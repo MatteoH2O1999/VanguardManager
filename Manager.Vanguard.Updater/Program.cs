@@ -14,15 +14,4 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace Manager.Vanguard.Service
-{
-    public class Worker(ILogger<Worker> Logger) : BackgroundService
-    {
-        private readonly ILogger logger = Logger;
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            throw new NotImplementedException();
-        }
-    }
-}
+Console.WriteLine("Hello, World!");

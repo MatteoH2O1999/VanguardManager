@@ -14,15 +14,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace Manager.Vanguard.Service
+namespace Manager.Vanguard.Launcher
 {
-    public class Worker(ILogger<Worker> Logger) : BackgroundService
+    internal static class Program
     {
-        private readonly ILogger logger = Logger;
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        /// <summary>
+        ///  The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main()
         {
-            throw new NotImplementedException();
+            // To customize application configuration such as set high DPI settings or default font,
+            // see https://aka.ms/applicationconfiguration.
+            ApplicationConfiguration.Initialize();
+            Application.Run(new Form1());
         }
     }
 }

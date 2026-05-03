@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Manager.Vanguard.Launcher\Manager.Vanguard.Launcher.csproj" />
+    <ProjectReference Include="..\Manager.Vanguard.Service\Manager.Vanguard.Service.csproj" />
+  </ItemGroup>
+</Project>

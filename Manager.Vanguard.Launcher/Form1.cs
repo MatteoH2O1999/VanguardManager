@@ -14,15 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace Manager.Vanguard.Service
+namespace Manager.Vanguard.Launcher
 {
-    public class Worker(ILogger<Worker> Logger) : BackgroundService
+    public partial class Form1 : Form
     {
-        private readonly ILogger logger = Logger;
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public Form1()
         {
-            throw new NotImplementedException();
+            InitializeComponent();
         }
     }
 }
