@@ -1,9 +1,11 @@
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package Id="TODO_Manufacturer.Installer" Name="Installer" Manufacturer="TODO Manufacturer" Version="1.0.0">
     <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
 
     <Feature Id="Main">
       <ComponentGroupRef Id="ExampleComponents" />
     </Feature>
+
+    <ui:WixUI Id="WixUI_Minimal" />
   </Package>
 </Wix>

@@ -3,6 +3,9 @@
     <AcceptEula>wix7</AcceptEula>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="7.*" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Manager.Vanguard.Updater\Manager.Vanguard.Updater.csproj" />
   </ItemGroup>
 </Project>
