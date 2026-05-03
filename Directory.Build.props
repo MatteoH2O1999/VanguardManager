@@ -10,9 +10,11 @@
     <FileVersion>$(Version)</FileVersion>
     <RepositoryUrl>https://github.com/MatteoH2O1999/VanguardManager</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Copyright>Copyright © Matteo Dell'Acqua 2025-$([System.DateTime]::Now.ToString("yyyy"))</Copyright>
+    <Copyright>Copyright © Matteo Dell'Acqua 2026-$([System.DateTime]::Now.ToString("yyyy"))</Copyright>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>true</ImplicitUsings>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
