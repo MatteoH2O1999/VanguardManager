@@ -15,6 +15,8 @@
     <LangVersion>latest</LangVersion>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>true</ImplicitUsings>
+    <SelfContained>true</SelfContained>
+    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
