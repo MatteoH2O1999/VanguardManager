@@ -1,0 +1,11 @@
+printWidth: 120
+useTabs: false
+indentSize: 4
+endOfLine: lf
+overrides:
+  - files: "*.{xml,csproj,config,wixproj,wxs,wxl,props,slnx}"
+    indentSize: 2
+    printWidth: 200
+    formatter: "xml"
+    endOfLine: lf
+    useTabs: false
