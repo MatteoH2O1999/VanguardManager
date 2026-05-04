@@ -17,8 +17,10 @@
     <ImplicitUsings>true</ImplicitUsings>
     <SelfContained>true</SelfContained>
     <PublishReadyToRun>true</PublishReadyToRun>
-    <DebugSymbols Condition="'$(Configuration)' == 'release'">false</DebugSymbols>
     <UseWindowsForms>true</UseWindowsForms>
+    <DebugSymbols Condition="'$(Configuration)' == 'release'">false</DebugSymbols>
+    <GenerateRuntimeConfigurationFiles Condition="'$(Configuration)' == 'release'">false</GenerateRuntimeConfigurationFiles>
+    <GenerateDependencyFile Condition="'$(Configuration)' == 'release'">false</GenerateDependencyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
