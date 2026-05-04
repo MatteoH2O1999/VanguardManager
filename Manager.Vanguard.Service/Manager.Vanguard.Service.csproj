@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
   <ItemGroup>
-    <ProjectReference Include="..\Manager.Vanguard.Lib\Manager.Vanguard.Lib.csproj" />
+    <ProjectReference Include="..\Manager.Vanguard.Common\Manager.Vanguard.Common.csproj" />
   </ItemGroup>
 </Project>

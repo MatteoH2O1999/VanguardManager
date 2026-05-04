@@ -6,6 +6,7 @@
   <PropertyGroup>
     <DefineConstants>AssemblyVersion=$(AssemblyVersion)</DefineConstants>
     <DefaultCompressionLevel>high</DefaultCompressionLevel>
+    <Cultures>it-IT;en-US;es-ES;fr-FR;de-DE</Cultures>
   </PropertyGroup>
 
   <ItemGroup>
