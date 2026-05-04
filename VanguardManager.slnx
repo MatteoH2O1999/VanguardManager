@@ -12,8 +12,9 @@
     <Platform Solution="*|Any CPU" Project="x64" />
     <Build Project="false" />
   </Project>
-  <Project Path="Manager.Vanguard.Launcher/Manager.Vanguard.Launcher.csproj"  />
+  <Project Path="Manager.Vanguard.Launcher/Manager.Vanguard.Launcher.csproj" />
   <Project Path="Manager.Vanguard.Lib/Manager.Vanguard.Lib.csproj" />
   <Project Path="Manager.Vanguard.Service/Manager.Vanguard.Service.csproj" />
-  <Project Path="Manager.Vanguard.Updater/Manager.Vanguard.Updater.csproj"  />
+  <Project Path="Manager.Vanguard.Translations/Manager.Vanguard.Translations.csproj" />
+  <Project Path="Manager.Vanguard.Updater/Manager.Vanguard.Updater.csproj" />
 </Solution>
