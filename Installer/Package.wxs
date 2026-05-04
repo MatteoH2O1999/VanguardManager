@@ -1,11 +1,11 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
-  <Package Id="TODO_Manufacturer.Installer" Name="Installer" Manufacturer="TODO Manufacturer" Version="1.0.0">
+  <Package Id="VanguardManager.Installer" Name="Vanguard Manager" Manufacturer="H2O Productions" Version="$(AssemblyVersion)">
     <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
 
     <Feature Id="Main">
-      <ComponentGroupRef Id="ExampleComponents" />
+      <ComponentGroupRef Id="AppFiles" />
     </Feature>
 
-    <ui:WixUI Id="WixUI_Minimal" />
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
   </Package>
 </Wix>

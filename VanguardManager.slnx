@@ -12,8 +12,8 @@
     <Platform Solution="*|Any CPU" Project="x64" />
     <Build Project="false" />
   </Project>
-  <Project Path="Manager.Vanguard.Launcher/Manager.Vanguard.Launcher.csproj" Id="5d0d327c-f742-4e91-94b1-33d806a4d228" />
+  <Project Path="Manager.Vanguard.Launcher/Manager.Vanguard.Launcher.csproj"  />
   <Project Path="Manager.Vanguard.Lib/Manager.Vanguard.Lib.csproj" />
   <Project Path="Manager.Vanguard.Service/Manager.Vanguard.Service.csproj" />
-  <Project Path="Manager.Vanguard.Updater/Manager.Vanguard.Updater.csproj" Id="844e43f5-0cf0-4eb6-9ca7-f9cb26347f53" />
+  <Project Path="Manager.Vanguard.Updater/Manager.Vanguard.Updater.csproj"  />
 </Solution>
