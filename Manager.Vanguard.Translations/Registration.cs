@@ -14,7 +14,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.DependencyInjection;
+
 namespace Manager.Vanguard.Translations
 {
-    public class Class1 { }
+    public static class Registration
+    {
+        public static T AddLocalizations<T>(this T services)
+            where T : IServiceCollection
+        {
+            services.AddLocalization(options =>
+            {
+                options.ResourcesPath = "Resources";
+            });
+            services.AddTransient<UpdaterLocalization>();
+            return services;
+        }
+    }
 }

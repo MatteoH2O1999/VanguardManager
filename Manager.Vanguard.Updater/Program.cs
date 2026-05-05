@@ -14,4 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Console.WriteLine("Hello, World!");
+using Manager.Vanguard.Translations;
+using Microsoft.Extensions.Hosting;
+
+HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+
+builder.Services.AddLocalizations();
+
+IHost app = builder.Build();

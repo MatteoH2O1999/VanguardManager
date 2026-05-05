@@ -7,5 +7,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Manager.Vanguard.Launcher\Manager.Vanguard.Launcher.csproj" />
     <ProjectReference Include="..\Manager.Vanguard.Service\Manager.Vanguard.Service.csproj" />
+    <ProjectReference Include="..\Manager.Vanguard.Translations\Manager.Vanguard.Translations.csproj" />
   </ItemGroup>
 </Project>
