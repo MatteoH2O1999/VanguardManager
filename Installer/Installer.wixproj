@@ -8,6 +8,7 @@
     <DefaultCompressionLevel>high</DefaultCompressionLevel>
     <Cultures>it-IT;en-US;es-ES;fr-FR;de-DE</Cultures>
     <Platform>x64</Platform>
+    <OutDir>$(MSBuildThisFileDirectory)/../msi</OutDir>
   </PropertyGroup>
 
   <ItemGroup>
