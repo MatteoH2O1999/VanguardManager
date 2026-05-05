@@ -14,4 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Console.WriteLine("Hello world!");
+using Microsoft.Extensions.Localization;
+
+namespace Manager.Vanguard.Translations.Resources
+{
+    public sealed class UpdaterLocalizer(IStringLocalizer<UpdaterLocalizer> Localizer)
+    {
+        private readonly IStringLocalizer localizer = Localizer;
+    }
+}
