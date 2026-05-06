@@ -32,5 +32,6 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.*" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.*" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="10.*" />
+    <PackageReference Include="Autoupdater.NET.Official" Version="1.9.2" />
   </ItemGroup>
 </Project>
