@@ -20,7 +20,7 @@ namespace Manager.Vanguard.Translations
 {
     public sealed class Localization(UpdaterLocalizer updaterLocalizer, LauncherLocalizer launcherLocalizer)
     {
-        public UpdaterLocalizer UpdaterLocalizer { get; } = updaterLocalizer;
-        public LauncherLocalizer LauncherLocalizer { get; } = launcherLocalizer;
+        public UpdaterLocalizer Updater { get; } = updaterLocalizer;
+        public LauncherLocalizer Launcher { get; } = launcherLocalizer;
     }
 }
