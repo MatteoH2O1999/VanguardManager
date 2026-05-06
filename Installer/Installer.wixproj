@@ -5,7 +5,6 @@
 
   <PropertyGroup>
     <DefineConstants>AssemblyVersion=$(AssemblyVersion)</DefineConstants>
-    <DefaultCompressionLevel>high</DefaultCompressionLevel>
     <Cultures>it-IT;en-US;es-ES;fr-FR;de-DE</Cultures>
     <Platform>x64</Platform>
     <OutDir>$(MSBuildThisFileDirectory)/../msi</OutDir>
@@ -22,5 +21,9 @@
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="dotnet run ./postbuild.cs" WorkingDirectory="$(MSBuildThisFileDirectory)/.." />
+  </Target>
+
+  <Target Name="CleanMSI" AfterTargets="Clean">
+    <RemoveDir Directories="$(OutDir)" />
   </Target>
 </Project>

@@ -50,7 +50,7 @@ foreach (DirectoryInfo dir in msiDir.GetDirectories())
     Directory.Delete(dir.FullName);
 
     XDocument versionDoc = new(
-        new XDeclaration("1.0", "UTF-8", "yes"),
+        new XDeclaration("1.0", "UTF-8", null),
         new XElement(
             "item",
             new XElement("version", version),

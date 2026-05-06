@@ -2,7 +2,7 @@
   <Package Id="VanguardManager.Installer" Name="Vanguard Manager" Manufacturer="H2O Productions" Version="$(AssemblyVersion)">
     <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
 
-    <MediaTemplate EmbedCab="yes" />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
     <Feature Id="Main">
       <ComponentGroupRef Id="AppFiles" />
