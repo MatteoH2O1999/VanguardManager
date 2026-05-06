@@ -1,4 +1,4 @@
-﻿<Project Sdk="WixToolset.Sdk/7.0.0">
+<Project Sdk="WixToolset.Sdk/7.0.0">
   <PropertyGroup>
     <AcceptEula>wix7</AcceptEula>
   </PropertyGroup>
@@ -19,4 +19,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Manager.Vanguard.Updater\Manager.Vanguard.Updater.csproj" Publish="True" />
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="dotnet run ./postbuild.cs" WorkingDirectory="$(MSBuildThisFileDirectory)/.." />
+  </Target>
 </Project>
