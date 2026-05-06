@@ -19,6 +19,7 @@
 
 using System.Diagnostics;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Xml.Linq;
 
 const string MSI_FOLDER = "msi";
@@ -43,6 +44,8 @@ foreach (DirectoryInfo dir in msiDir.GetDirectories())
 
     FileInfo msi = files[0];
 
+    string hash = CalculateHash(msi);
+
     string newName = $"{MSI_BASE_NAME}-{culture}.msi";
 
     File.Move(msi.FullName, Path.Combine(msiDir.FullName, newName));
@@ -59,9 +62,18 @@ foreach (DirectoryInfo dir in msiDir.GetDirectories())
                 "url",
                 $"https://github.com/MatteoH2O1999/VanguardManager/releases/download/{version}/{newName}"
             ),
-            new XElement("changelog", $"https://github.com/MatteoH2O1999/VanguardManager/releases/tag/{version}")
+            new XElement("changelog", $"https://github.com/MatteoH2O1999/VanguardManager/releases/tag/{version}"),
+            new XElement("checksum", new XAttribute("algorithm", "SHA512"), hash)
         )
     );
 
     versionDoc.Save(Path.Combine(msiDir.FullName, $"version-{culture}.xml"));
+}
+
+static string CalculateHash(FileInfo file)
+{
+    using SHA512 hasher = SHA512.Create();
+    using FileStream fileStream = file.OpenRead();
+    byte[] hashBytes = hasher.ComputeHash(fileStream);
+    return Convert.ToHexStringLower(hashBytes);
 }
