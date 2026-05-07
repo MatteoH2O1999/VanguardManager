@@ -1,0 +1,62 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+permissions: read-all
+
+env:
+  DOTNET_VERSION: "10.x"
+
+jobs:
+  lint:
+    name: Lint code
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Restore tools
+        run: dotnet tool restore
+      - name: Run csharpier code style formattter
+        run: dotnet csharpier check . --log-level Debug
+      - name: Run .NET style formatter
+        run: dotnet format style --verify-no-changes --severity info -v n .
+      - name: Run .NET analyzers
+        run: dotnet format analyzers --verify-no-changes --severity info -v n .
+
+  codeql:
+    name: CodeQL
+    runs-on: windows-latest
+    permissions:
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: actions
+            build-mode: none
+          - language: csharp
+            build-mode: autobuild
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-extended
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{matrix.language}}"
