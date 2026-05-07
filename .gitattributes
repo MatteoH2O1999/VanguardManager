@@ -6,6 +6,10 @@
 *.csproj eol=lf
 *.slnx eol=lf
 *.svg eol=lf
+*.props eol=lf
+*.wxs eol=lf
+*.wxl eol=lf
+*.wixproj eol=lf
 
 ###############################################################################
 # Set default behavior for command prompt diff.
