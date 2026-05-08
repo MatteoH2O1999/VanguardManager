@@ -86,7 +86,6 @@ jobs:
     runs-on: windows-latest
     needs: [build, codeql, lint]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    environment: release
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

@@ -14,10 +14,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#:package Octokit@*
 #:property UseWindowsForms=false
 #:property NoWarn=CA2201
 
+using System.Reflection;
+using Octokit;
+
 string GITHUB_TOKEN =
     Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new Exception("GITHUB_TOKEN not found");
+Version version =
+    Assembly.GetExecutingAssembly().GetName().Version ?? throw new Exception("Could not derive assembly version");
+string tag = $"{version.Major}.{version.Minor}.{version.Build}";
 
-Console.WriteLine(string.Join(", ", args));
+GitHubClient github = new(new ProductHeaderValue("VanguardManagerCI")) { Credentials = new(GITHUB_TOKEN) };
+
+Console.WriteLine($"Checking if tag {tag} already exists...");
