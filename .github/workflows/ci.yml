@@ -80,3 +80,24 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - name: Build installers
         run: dotnet build -c=Release ./Installer/Installer.wixproj
+
+  dispatch:
+    name: Check if a release needs to be created
+    runs-on: windows-latest
+    needs: [build, codeql, lint]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    environment: release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Run dispatch script
+        run: dotnet run ./.github/scripts/dispatch.cs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

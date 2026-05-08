@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      major:
+        type: number
+        required: true
+      minor:
+        type: number
+        required: true
+      patch:
+        type: number
+        required: true
+      dotnet-version:
+        type: string
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.major }}.${{ inputs.minor }}.${{ inputs.patch }}
+
+permissions: read-all
+
+jobs:
+  release:
+    name: Build installers and create release
+    runs-on: windows-latest
+    environment: environment
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+      - name: Sanity check
+        run: dotnet run ./.github/scripts/validate.cs ${{ inputs.major }} ${{ inputs.minor }} ${{ inputs.patch }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
