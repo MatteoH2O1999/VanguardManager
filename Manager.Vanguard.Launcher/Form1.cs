@@ -20,7 +20,7 @@ namespace Manager.Vanguard.Launcher
     {
         public Form1()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }
