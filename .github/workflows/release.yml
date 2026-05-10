@@ -25,7 +25,11 @@ jobs:
   release:
     name: Build installers and create release
     runs-on: windows-latest
-    environment: environment
+    permissions:
+      contents: write
+    environment:
+      name: release
+      url: https://github.com/MatteoH2O1999/VanguardManager/releases/tag/${{ inputs.major }}.${{ inputs.minor }}.${{ inputs.patch }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -40,3 +44,12 @@ jobs:
         run: dotnet run ./.github/scripts/validate.cs ${{ inputs.major }} ${{ inputs.minor }} ${{ inputs.patch }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - name: Build installers
+        run: dotnet build -c=Release ./Installer/Installer.wixproj
+      - name: Create release
+        uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true
+          files: ./msi/**
+          fail_on_unmatched_files: true
+          make_latest: true

@@ -18,6 +18,7 @@
 #:property UseWindowsForms=false
 #:property NoWarn=CA2201
 
+using System.Diagnostics;
 using System.Reflection;
 using Octokit;
 
@@ -26,13 +27,59 @@ string GITHUB_TOKEN =
 Version version =
     Assembly.GetExecutingAssembly().GetName().Version ?? throw new Exception("Could not derive assembly version");
 string tag = $"{version.Major}.{version.Minor}.{version.Build}";
+string sha = Environment.GetEnvironmentVariable("GITHUB_SHA") ?? throw new Exception("GITHUB_SHA not found");
+
+Console.WriteLine($"Checking if tag {tag} already exists...");
 
 GitHubClient github = new(new ProductHeaderValue("VanguardManagerCI")) { Credentials = new(GITHUB_TOKEN) };
 
 Repository repo = await github.Repository.Get("MatteoH2O1999", "VanguardManager");
 
-Console.WriteLine(repo.ToString());
+IReadOnlyList<RepositoryTag> tags = await github.Repository.GetAllTags(repo.Id);
 
-IReadOnlyList<GitHubCommit> commits = await github.Repository.Commit.GetAll(repo.Id);
+RepositoryTag[] filteredTags = [.. tags.Where(t => t.Name == tag)];
 
-Console.WriteLine(string.Join(", ", commits.Select(c => c.Sha)));
+Trace.Assert(filteredTags.Length <= 1);
+
+if (filteredTags.Length == 1)
+{
+    Console.WriteLine($"Tag {tag} already exist. No new release is needed.");
+}
+else
+{
+    Trace.Assert(filteredTags.Length == 0);
+
+    Console.WriteLine($"Creating tag {tag}...");
+    string tagSha = (
+        await github.Git.Tag.Create(
+            repo.Id,
+            new()
+            {
+                Object = sha,
+                Tag = tag,
+                Tagger = new("github-actions[bot]", "github-actions[bot]@users.noreply.github.com", DateTimeOffset.Now),
+                Type = TaggedType.Commit,
+                Message = tag,
+            }
+        )
+    ).Sha;
+    Reference tagRef = await github.Git.Reference.Create(repo.Id, new($"refs/tags/{tag}", tagSha));
+
+    Console.WriteLine($"Dispatching release job...");
+    await github.Actions.Workflows.CreateDispatch(
+        repo.Id,
+        ".github/workflows/release.yml",
+        new(tag)
+        {
+            Inputs = new Dictionary<string, object>()
+            {
+                ["major"] = $"{version.Major}",
+                ["minor"] = $"{version.Minor}",
+                ["patch"] = $"{version.Build}",
+                ["dotnet-version"] =
+                    Environment.GetEnvironmentVariable("DOTNET_VERSION")
+                    ?? throw new Exception("Could not find DOTNET_VERSION"),
+            },
+        }
+    );
+}

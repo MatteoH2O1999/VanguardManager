@@ -14,10 +14,34 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#:package Octokit@*
 #:property UseWindowsForms=false
 #:property NoWarn=CA2201
 
+using System.Diagnostics;
+using System.Reflection;
+using Octokit;
+
 string GITHUB_TOKEN =
     Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new Exception("GITHUB_TOKEN not found");
+Version version =
+    Assembly.GetExecutingAssembly().GetName().Version ?? throw new Exception("Could not derive assembly version");
+string tag = $"{version.Major}.{version.Minor}.{version.Build}";
 
-Console.WriteLine(string.Join(", ", args));
+GitHubClient github = new(new ProductHeaderValue("VanguardManagerCI")) { Credentials = new(GITHUB_TOKEN) };
+
+Repository repo = await github.Repository.Get("MatteoH2O1999", "VanguardManager");
+
+IReadOnlyList<RepositoryTag> tags = await github.Repository.GetAllTags(repo.Id);
+
+RepositoryTag[] filteredTags = [.. tags.Where(t => t.Name == tag)];
+
+IReadOnlyList<Release> releases = await github.Repository.Release.GetAll(repo.Id);
+
+Release[] filteredReleases = [.. releases.Where(r => r.TagName == tag)];
+
+Console.WriteLine("Performing sanity checks...");
+
+Trace.Assert(Environment.GetEnvironmentVariable("GITHUB_REF") == $"refs/tags/{tag}");
+Trace.Assert(filteredReleases.Length == 0);
+Trace.Assert(filteredTags.Length == 1);
