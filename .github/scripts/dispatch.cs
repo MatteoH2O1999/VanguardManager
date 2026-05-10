@@ -29,4 +29,10 @@ string tag = $"{version.Major}.{version.Minor}.{version.Build}";
 
 GitHubClient github = new(new ProductHeaderValue("VanguardManagerCI")) { Credentials = new(GITHUB_TOKEN) };
 
-Console.WriteLine($"Checking if tag {tag} already exists...");
+Repository repo = await github.Repository.Get("MatteoH2O1999", "VanguardManager");
+
+Console.WriteLine(repo.ToString());
+
+IReadOnlyList<GitHubCommit> commits = await github.Repository.Commit.GetAll(repo.Id);
+
+Console.WriteLine(string.Join(", ", commits.Select(c => c.Sha)));
