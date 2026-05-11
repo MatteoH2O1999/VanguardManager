@@ -12,6 +12,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="license.rtf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="WixToolset.UI.wixext" Version="7.*" />
   </ItemGroup>
 

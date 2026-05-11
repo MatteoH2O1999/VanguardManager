@@ -47,3 +47,5 @@ Trace.Assert(Environment.GetEnvironmentVariable("GITHUB_REF") == $"refs/tags/{ta
 Trace.Assert(filteredReleases.Length == 0);
 Trace.Assert(filteredTags.Length == 1);
 Trace.Assert(tag == argsTag);
+
+Console.WriteLine("Chacks completed successfully. Release may proceed.");

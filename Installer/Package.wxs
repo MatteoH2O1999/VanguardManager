@@ -8,6 +8,8 @@
       <ComponentGroupRef Id="AppFiles" />
     </Feature>
 
+    <WixVariable Id="WixUILicenseRtf" Value="./license.rtf" />
+
     <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
   </Package>
 </Wix>
