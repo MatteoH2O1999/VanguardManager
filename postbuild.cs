@@ -27,6 +27,7 @@ const string MSI_BASE_NAME = "VanguardManagerInstaller";
 
 Version version =
     Assembly.GetExecutingAssembly().GetName().Version ?? throw new Exception("Could not derive assembly version");
+string versionString = $"{version.Major}.{version.Minor}.{version.Build}";
 
 DirectoryInfo msiDir = new(Path.Combine(Directory.GetCurrentDirectory(), MSI_FOLDER));
 
@@ -60,9 +61,9 @@ foreach (DirectoryInfo dir in msiDir.GetDirectories())
             new XElement("mandatory", false),
             new XElement(
                 "url",
-                $"https://github.com/MatteoH2O1999/VanguardManager/releases/download/{version}/{newName}"
+                $"https://github.com/MatteoH2O1999/VanguardManager/releases/download/{versionString}/{newName}"
             ),
-            new XElement("changelog", $"https://github.com/MatteoH2O1999/VanguardManager/releases/tag/{version}"),
+            new XElement("changelog", $"https://github.com/MatteoH2O1999/VanguardManager/releases/tag/{versionString}"),
             new XElement("checksum", new XAttribute("algorithm", "SHA512"), hash)
         )
     );

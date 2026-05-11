@@ -27,6 +27,7 @@ string GITHUB_TOKEN =
 Version version =
     Assembly.GetExecutingAssembly().GetName().Version ?? throw new Exception("Could not derive assembly version");
 string tag = $"{version.Major}.{version.Minor}.{version.Build}";
+string argsTag = $"{args[0]}.{args[1]}.{args[2]}";
 
 GitHubClient github = new(new ProductHeaderValue("VanguardManagerCI")) { Credentials = new(GITHUB_TOKEN) };
 
@@ -45,3 +46,4 @@ Console.WriteLine("Performing sanity checks...");
 Trace.Assert(Environment.GetEnvironmentVariable("GITHUB_REF") == $"refs/tags/{tag}");
 Trace.Assert(filteredReleases.Length == 0);
 Trace.Assert(filteredTags.Length == 1);
+Trace.Assert(tag == argsTag);
