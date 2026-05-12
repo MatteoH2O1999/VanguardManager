@@ -6,6 +6,13 @@
 
     <Feature Id="Main">
       <ComponentGroupRef Id="AppFiles" />
+
+      <Component>
+        <RegistryValue Id="CultureKey" Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Type="integer" Name="InstallerCultureLCID" Value="[ProductLanguage]" Action="write" />
+        <RemoveRegistryKey Id="RemoveCultureKey" Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Action="removeOnUninstall" />
+        <RemoveFile Directory="INSTALLFOLDER" Name="*.*" On="uninstall" />
+        <RemoveFolder Directory="INSTALLFOLDER" On="uninstall" />
+      </Component>
     </Feature>
 
     <WixVariable Id="WixUILicenseRtf" Value="./license.rtf" />
