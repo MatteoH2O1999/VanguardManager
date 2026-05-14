@@ -5,6 +5,7 @@
     <Version>0.0.1</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Authors>Matteo Dell'Acqua</Authors>
+    <Company>H2O Productions</Company>
     <PackageVersion>$(Version)</PackageVersion>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
