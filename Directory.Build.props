@@ -10,7 +10,6 @@
     <PackageVersion>$(Version)</PackageVersion>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
-    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <RepositoryUrl>https://github.com/MatteoH2O1999/VanguardManager</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Copyright>Copyright © Matteo Dell'Acqua 2026-$([System.DateTime]::Now.ToString("yyyy"))</Copyright>

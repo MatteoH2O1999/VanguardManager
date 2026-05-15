@@ -16,5 +16,23 @@
 
 namespace Manager.Vanguard.Common
 {
-    public class Class1 { }
+    public static class ApplicationData
+    {
+        /// <summary>
+        /// The path to the application's folder in <c>%appdata%/Local</c>.
+        /// </summary>
+        public static string Local { get; }
+
+        static ApplicationData()
+        {
+            string companyName = Application.CompanyName;
+            string productName = Application.ProductName;
+
+            Local = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                companyName,
+                productName
+            );
+        }
+    }
 }
