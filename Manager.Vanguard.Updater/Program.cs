@@ -17,8 +17,6 @@
 using System.Globalization;
 using Microsoft.Win32;
 
-Console.WriteLine("Hello world!");
-
 CultureInfo installerCulture = new(
     (int?)
         Registry.GetValue(
@@ -29,4 +27,5 @@ CultureInfo installerCulture = new(
         ?? new CultureInfo("en-US").LCID
 );
 
-Console.WriteLine(installerCulture.Name);
+string versionXmlUrl =
+    $"https://github.com/MatteoH2O1999/VanguardManager/releases/latest/download/version-{installerCulture.Name}.xml";

@@ -16,6 +16,9 @@
 
 namespace Manager.Vanguard.Common
 {
+    /// <summary>
+    /// Static class that contains various data about this product.
+    /// </summary>
     public static class ApplicationData
     {
         /// <summary>
@@ -23,11 +26,17 @@ namespace Manager.Vanguard.Common
         /// </summary>
         public static string Local { get; }
 
+        /// <summary>
+        /// The application's shared name.
+        /// </summary>
+        public static string AppName { get; }
+
         static ApplicationData()
         {
             ArgumentNullException.ThrowIfNull(Application.CompanyName);
             ArgumentNullException.ThrowIfNull(Application.ProductName);
 
+            AppName = Application.ProductName;
             Local = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 Application.CompanyName,
