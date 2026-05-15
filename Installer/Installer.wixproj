@@ -1,10 +1,10 @@
-<Project Sdk="WixToolset.Sdk/7.0.0">
+﻿<Project Sdk="WixToolset.Sdk/7.0.0">
   <PropertyGroup>
     <AcceptEula>wix7</AcceptEula>
   </PropertyGroup>
 
   <PropertyGroup>
-    <DefineConstants>AssemblyVersion=$(AssemblyVersion)</DefineConstants>
+    <DefineConstants>AssemblyVersion=$(AssemblyVersion);Product=$(Product);Company=$(Company)</DefineConstants>
     <Cultures>it-IT;en-US;es-ES;fr-FR;de-DE</Cultures>
     <Platform>x64</Platform>
     <OutDir>$(MSBuildThisFileDirectory)/../msi</OutDir>
