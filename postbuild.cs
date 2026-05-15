@@ -59,6 +59,7 @@ foreach (DirectoryInfo dir in msiDir.GetDirectories())
             "item",
             new XElement("version", version),
             new XElement("mandatory", false),
+            new XElement("args", "INSTALLFOLDER=%path%"),
             new XElement(
                 "url",
                 $"https://github.com/MatteoH2O1999/VanguardManager/releases/download/{versionString}/{newName}"
