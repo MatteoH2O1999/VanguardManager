@@ -6,5 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Manager.Vanguard.Common\Manager.Vanguard.Common.csproj" />
+    <ProjectReference Include="..\Manager.Vanguard.Translations\Manager.Vanguard.Translations.csproj" />
   </ItemGroup>
 </Project>
