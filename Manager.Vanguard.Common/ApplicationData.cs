@@ -25,13 +25,13 @@ namespace Manager.Vanguard.Common
 
         static ApplicationData()
         {
-            string companyName = Application.CompanyName;
-            string productName = Application.ProductName;
+            ArgumentNullException.ThrowIfNull(Application.CompanyName);
+            ArgumentNullException.ThrowIfNull(Application.ProductName);
 
             Local = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                companyName,
-                productName
+                Application.CompanyName,
+                Application.ProductName
             );
         }
     }
