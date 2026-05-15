@@ -14,18 +14,29 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Globalization;
-using Microsoft.Win32;
+using Manager.Vanguard.Common;
+using Manager.Vanguard.Updater;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
-CultureInfo installerCulture = new(
-    (int?)
-        Registry.GetValue(
-            $"HKEY_LOCAL_MACHINE\\SOFTWARE\\{Application.CompanyName}\\{Application.ProductName}",
-            "InstallerCultureLCID",
-            null
-        )
-        ?? new CultureInfo("en-US").LCID
-);
+HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
-string versionXmlUrl =
-    $"https://github.com/MatteoH2O1999/VanguardManager/releases/latest/download/version-{installerCulture.Name}.xml";
+builder.Logging.ClearProviders();
+builder.Logging.AddFile($"{ApplicationData.Local}/logs/updater-{{Date}}.log", minimumLevel: LogLevel.Information);
+builder.Logging.AddEventLog(options =>
+{
+    options.Filter = (_, level) => level >= LogLevel.Critical;
+    options.SourceName = ApplicationData.AppName;
+});
+#if DEBUG
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Trace);
+#endif
+
+builder.Services.AddTransient<Runner>();
+
+using IHost app = builder.Build();
+
+Runner runner = app.Services.GetRequiredService<Runner>();
+runner.Run();
