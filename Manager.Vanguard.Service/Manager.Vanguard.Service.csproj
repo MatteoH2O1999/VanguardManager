@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
   <PropertyGroup>
     <AssemblyName>service</AssemblyName>
+    <AssemblyTitle>Background service for Vanguard Manager</AssemblyTitle>
   </PropertyGroup>
 
   <ItemGroup>

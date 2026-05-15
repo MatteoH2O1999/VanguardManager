@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <AssemblyTitle>Updater for Vanguard Manager</AssemblyTitle>
     <AssemblyName>updater</AssemblyName>
   </PropertyGroup>
 
