@@ -14,4 +14,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Globalization;
+using Microsoft.Win32;
+
 Console.WriteLine("Hello world!");
+
+CultureInfo installerCulture = new(
+    (int?)
+        Registry.GetValue(
+            $"HKEY_LOCAL_MACHINE\\SOFTWARE\\{Application.CompanyName}\\{Application.ProductName}",
+            "InstallerCultureLCID",
+            null
+        )
+        ?? new CultureInfo("en-US").LCID
+);
+
+Console.WriteLine(installerCulture.Name);
