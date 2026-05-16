@@ -6,7 +6,6 @@
   <PropertyGroup>
     <DefineConstants>AssemblyVersion=$(AssemblyVersion);Product=$(Product);Company=$(Company)</DefineConstants>
     <Cultures>it-IT;en-US;es-ES;fr-FR;de-DE</Cultures>
-    <Platform>x64</Platform>
     <OutDir>$(MSBuildThisFileDirectory)/../msi</OutDir>
     <SuppressPdbOutput>true</SuppressPdbOutput>
   </PropertyGroup>
@@ -20,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\InstallerEventSourceCA\InstallerEventSourceCA.csproj" />
     <ProjectReference Include="..\Manager.Vanguard.Updater\Manager.Vanguard.Updater.csproj" Publish="True" />
   </ItemGroup>
 

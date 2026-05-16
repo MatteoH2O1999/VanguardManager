@@ -15,6 +15,7 @@
     <Build Project="false" />
   </Project>
   <Project Path="Manager.Vanguard.Launcher/Manager.Vanguard.Launcher.csproj" />
+  <Project Path="InstallerEventSourceCA/InstallerEventSourceCA.csproj" />
   <Project Path="Manager.Vanguard.Common/Manager.Vanguard.Common.csproj" />
   <Project Path="Manager.Vanguard.Service/Manager.Vanguard.Service.csproj" />
   <Project Path="Manager.Vanguard.Translations/Manager.Vanguard.Translations.csproj" />

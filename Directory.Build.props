@@ -30,7 +30,7 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
-  <ItemGroup Condition="$(MSBuildProjectExtension) == '.csproj'">
+  <ItemGroup Condition="$(MSBuildProjectExtension) == '.csproj' And $(SkipDirectoryDeps) != true">
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.*" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.*" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="10.*" />
