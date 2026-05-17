@@ -30,6 +30,8 @@ namespace InstallerEventSourceCA
 
                 string action = session.CustomActionData["Action"];
                 string appName = session.CustomActionData["AppName"];
+                string company = session.CustomActionData["CompanyName"];
+                string dialogString = session.CustomActionData["DialogString"];
 
                 switch (action)
                 {
@@ -58,6 +60,23 @@ namespace InstallerEventSourceCA
                         }
                         session.Log($"Deleting event source '{appName}'");
                         EventLog.DeleteEventSource(appName);
+                        if (
+                            session.Message(
+                                InstallMessage.User
+                                    | (InstallMessage)MessageBoxButtons.YesNo
+                                    | (InstallMessage)MessageIcon.None
+                                    | (InstallMessage)MessageDefaultButton.Button2,
+                                new() { FormatString = dialogString }
+                            ) == MessageResult.Yes
+                        )
+                        {
+                            string localFilesPath = Path.Combine(
+                                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                                company,
+                                appName
+                            );
+                            session.Log($"Deleting local files from {localFilesPath}");
+                        }
                         break;
                     default:
                         session.Log($"Invalid action: '{action}'");
