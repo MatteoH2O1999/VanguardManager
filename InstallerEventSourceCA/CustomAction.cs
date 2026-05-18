@@ -38,15 +38,16 @@ namespace InstallerEventSourceCA
                     case "Install":
                         session.Log("Performing 'Install' action");
 
-                        if (!EventLog.SourceExists(appName))
+                        if (EventLog.SourceExists(appName))
                         {
                             session.Log(
-                                $"Failed InstallerEventSourceCA: source '{appName}' does not exist. "
-                                    + $"{appName} Service should have registered it. The installation is probably corrupted."
+                                $"Failed InstallerEventSourceCA: source '{appName}' already exists. "
+                                    + $"{appName} is probably already installed or the installation was corrupted."
                             );
                             return ActionResult.Failure;
                         }
-                        session.Log($"Event source '{appName}' found");
+                        session.Log($"Creating event source '{appName}'");
+                        EventLog.CreateEventSource(appName, "Application");
 
                         break;
                     case "Uninstall":

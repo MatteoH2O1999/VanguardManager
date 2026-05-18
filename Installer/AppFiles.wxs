@@ -19,7 +19,7 @@
           Account="LocalSystem"
           ErrorControl="normal"
         />
-        <ServiceControl Id="StartService" Start="install" Stop="both" Remove="uninstall" Name="Manager.Vanguard.Service" Wait="yes" />
+        <ServiceControl Id="StartService" Stop="both" Remove="uninstall" Name="Manager.Vanguard.Service" Wait="yes" />
       </Component>
     </ComponentGroup>
   </Fragment>
