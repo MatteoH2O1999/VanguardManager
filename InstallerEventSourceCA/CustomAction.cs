@@ -37,29 +37,32 @@ namespace InstallerEventSourceCA
                 {
                     case "Install":
                         session.Log("Performing 'Install' action");
-                        if (EventLog.SourceExists(appName))
-                        {
-                            session.Log(
-                                $"Failed InstallerEventSourceCA: source '{appName}' already exists. "
-                                    + $"{appName} is probably already installed or the previous installation was corrupted."
-                            );
-                            return ActionResult.Failure;
-                        }
-                        session.Log($"Creating event source '{appName}'");
-                        EventLog.CreateEventSource(appName, "Application");
-                        break;
-                    case "Uninstall":
-                        session.Log("Performing 'Uninstall' action");
+
                         if (!EventLog.SourceExists(appName))
                         {
                             session.Log(
-                                $"Failed InstallerEventSourceCA: source '{appName}' does not exists. "
+                                $"Failed InstallerEventSourceCA: source '{appName}' does not exist. "
+                                    + $"{appName} Service should have registered it. The installation is probably corrupted."
+                            );
+                            return ActionResult.Failure;
+                        }
+                        session.Log($"Event source '{appName}' found");
+
+                        break;
+                    case "Uninstall":
+                        session.Log("Performing 'Uninstall' action");
+
+                        if (!EventLog.SourceExists(appName))
+                        {
+                            session.Log(
+                                $"Failed InstallerEventSourceCA: source '{appName}' does not exist. "
                                     + $"{appName} is probably already uninstalled or the installation was corrupted."
                             );
                             return ActionResult.Failure;
                         }
                         session.Log($"Deleting event source '{appName}'");
                         EventLog.DeleteEventSource(appName);
+
                         if (
                             session.Message(
                                 InstallMessage.User
@@ -76,7 +79,10 @@ namespace InstallerEventSourceCA
                                 appName
                             );
                             session.Log($"Deleting local files from {localFilesPath}");
+                            DirectoryInfo localFiles = new(localFilesPath);
+                            localFiles.Delete(true);
                         }
+
                         break;
                     default:
                         session.Log($"Invalid action: '{action}'");
