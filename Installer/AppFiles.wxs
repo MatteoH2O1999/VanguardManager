@@ -12,14 +12,14 @@
           Interactive="no"
           Id="ServiceInstaller"
           Type="ownProcess"
-          Name="Manager.Vanguard.Service"
+          Name="VanguardManager"
           DisplayName="!(loc.ServiceDisplayName)"
           Description="!(loc.ServiceDescription)"
           Start="auto"
-          Account="LocalSystem"
+          Account="LocalService"
           ErrorControl="normal"
         />
-        <ServiceControl Id="StartService" Stop="both" Remove="uninstall" Name="Manager.Vanguard.Service" Wait="yes" />
+        <ServiceControl Id="StartService" Stop="both" Remove="uninstall" Name="VanguardManager" Wait="yes" />
       </Component>
     </ComponentGroup>
   </Fragment>
