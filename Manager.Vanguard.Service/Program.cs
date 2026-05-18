@@ -19,6 +19,12 @@ using Manager.Vanguard.Service;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddEventLog(options =>
+{
+    options.SourceName = ApplicationData.AppName;
+});
+
 builder.Services.AddWindowsService(options =>
 {
     options.ServiceName = ApplicationData.AppName;
