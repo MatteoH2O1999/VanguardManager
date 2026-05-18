@@ -4,4 +4,6 @@ This file contains the declaration of all the localizable strings.
 <WixLocalization xmlns="http://wixtoolset.org/schemas/v4/wxl" Culture="it-IT">
   <String Id="DowngradeError" Value="Una versione più recente di [ProductName] è già installata." />
   <String Id="RemoveLocalFilesDialog" Value="Rimuovere file locali?" />
+  <String Id="ServiceDisplayName" Value="$(Product) Service" />
+  <String Id="ServiceDescription" Value="Servizio in background per $(Product)" />
 </WixLocalization>
