@@ -20,7 +20,7 @@ using Microsoft.Win32;
 
 namespace Manager.Vanguard.Updater
 {
-    public sealed class Runner(ILogger<Runner> Logger)
+    public sealed partial class Runner(ILogger<Runner> Logger)
     {
         private readonly ILogger logger = Logger;
 
@@ -38,6 +38,11 @@ namespace Manager.Vanguard.Updater
 
             string versionXmlUrl =
                 $"https://github.com/MatteoH2O1999/VanguardManager/releases/latest/download/version-{installerCulture.Name}.xml";
+
+            this.LogXmlUrl(versionXmlUrl);
         }
+
+        [LoggerMessage(LogLevel.Information, "{url}")]
+        private partial void LogXmlUrl(string url);
     }
 }

@@ -16,13 +16,17 @@
 
 namespace Manager.Vanguard.Service
 {
-    public class Worker(ILogger<Worker> Logger) : BackgroundService
+    public sealed partial class Worker(ILogger<Worker> Logger) : BackgroundService
     {
         private readonly ILogger logger = Logger;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            throw new NotImplementedException();
+            this.LogTodo();
+            Environment.Exit(0);
         }
+
+        [LoggerMessage(LogLevel.Warning, "TODO: Implement service")]
+        private partial void LogTodo();
     }
 }
