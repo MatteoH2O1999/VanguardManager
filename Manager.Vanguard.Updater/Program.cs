@@ -23,7 +23,7 @@ using Microsoft.Extensions.Logging;
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
 builder.Logging.ClearProviders();
-builder.Logging.AddFile($"{ApplicationData.Local}/logs/updater-{{Date}}.log", minimumLevel: LogLevel.Information);
+builder.Logging.AddFileLogging("updater");
 builder.Logging.AddEventLog(options =>
 {
     options.Filter = (_, level) => level >= LogLevel.Critical;
@@ -38,5 +38,13 @@ builder.Services.AddTransient<Runner>();
 
 using IHost app = builder.Build();
 
-Runner runner = app.Services.GetRequiredService<Runner>();
-runner.Run();
+try
+{
+    Runner runner = app.Services.GetRequiredService<Runner>();
+    runner.Run();
+}
+catch (Exception ex)
+{
+    ILogger logger = app.Services.GetRequiredService<ILogger>();
+    Logs.LogOutOfHostCrash(logger, ex);
+}

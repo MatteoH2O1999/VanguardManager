@@ -20,6 +20,7 @@ using Manager.Vanguard.Service;
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
 builder.Logging.ClearProviders();
+builder.Logging.AddFileLogging("service");
 builder.Logging.AddEventLog(options =>
 {
     options.SourceName = ApplicationData.AppName;
