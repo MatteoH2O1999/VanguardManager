@@ -1,12 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <AssemblyTitle>Updater for Vanguard Manager</AssemblyTitle>
     <AssemblyName>updater</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Manager.Vanguard.Launcher\Manager.Vanguard.Launcher.csproj" />
     <ProjectReference Include="..\Manager.Vanguard.Service\Manager.Vanguard.Service.csproj" />
+    <ProjectReference Include="..\Manager.Vanguard.Common\Manager.Vanguard.Common.csproj" />
     <ProjectReference Include="..\Manager.Vanguard.Translations\Manager.Vanguard.Translations.csproj" />
   </ItemGroup>
 </Project>

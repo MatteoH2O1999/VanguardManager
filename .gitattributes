@@ -10,6 +10,7 @@
 *.wxs eol=lf
 *.wxl eol=lf
 *.wixproj eol=lf
+*.config eol=lf
 
 ###############################################################################
 # Set default behavior for command prompt diff.

@@ -1,7 +1,26 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Fragment>
     <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
-      <Files Include="!(bindpath.Manager.Vanguard.Updater)\**" />
+      <Files Include="!(bindpath.Manager.Vanguard.Updater)\**">
+        <Exclude Files="!(bindpath.Manager.Vanguard.Updater)\service.exe" />
+      </Files>
+
+      <Component Id="ServiceExecutable">
+        <File Id="ServiceExecutableFile" Source="!(bindpath.Manager.Vanguard.Updater)\service.exe" KeyPath="true" />
+        <ServiceInstall
+          Vital="yes"
+          Interactive="no"
+          Id="ServiceInstaller"
+          Type="ownProcess"
+          Name="VanguardManager"
+          DisplayName="!(loc.ServiceDisplayName)"
+          Description="!(loc.ServiceDescription)"
+          Start="auto"
+          Account="LocalService"
+          ErrorControl="normal"
+        />
+        <ServiceControl Id="StartService" Stop="both" Remove="uninstall" Name="VanguardManager" Wait="yes" />
+      </Component>
     </ComponentGroup>
   </Fragment>
 </Wix>

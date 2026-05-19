@@ -14,4 +14,37 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Console.WriteLine("Hello world!");
+using Manager.Vanguard.Common;
+using Manager.Vanguard.Updater;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.AddFileLogging("updater");
+builder.Logging.AddEventLog(options =>
+{
+    options.Filter = (_, level) => level >= LogLevel.Critical;
+    options.SourceName = ApplicationData.AppName;
+});
+#if DEBUG
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Trace);
+#endif
+
+builder.Services.AddTransient<Runner>();
+
+using IHost app = builder.Build();
+
+try
+{
+    Runner runner = app.Services.GetRequiredService<Runner>();
+    runner.Run();
+}
+catch (Exception ex)
+{
+    ILogger logger = app.Services.GetRequiredService<ILogger>();
+    Logs.LogOutOfHostCrash(logger, ex);
+}

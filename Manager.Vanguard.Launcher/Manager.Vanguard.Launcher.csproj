@@ -2,9 +2,11 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <AssemblyName>launcher</AssemblyName>
+    <AssemblyTitle>Launcher for Vanguard Manager</AssemblyTitle>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Manager.Vanguard.Common\Manager.Vanguard.Common.csproj" />
+    <ProjectReference Include="..\Manager.Vanguard.Translations\Manager.Vanguard.Translations.csproj" />
   </ItemGroup>
 </Project>

@@ -14,13 +14,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Manager.Vanguard.Common;
 using Manager.Vanguard.Service;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddFileLogging("service");
+builder.Logging.AddEventLog(options =>
+{
+    options.SourceName = ApplicationData.AppName;
+});
+
 builder.Services.AddWindowsService(options =>
 {
-    options.ServiceName = "Vanguard Manager Service";
+    options.ServiceName = ApplicationData.AppName;
 });
 
 builder.Services.AddHostedService<Worker>();

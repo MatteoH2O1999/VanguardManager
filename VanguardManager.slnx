@@ -5,15 +5,18 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Folder Name="/Setup/">
+    <Project Path="Installer/Installer.wixproj" Type="b7dd6f7e-def8-4e67-b5b7-07ef123db6f0">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Build Project="false" />
+    </Project>
+    <Project Path="InstallerEventSourceCA/InstallerEventSourceCA.csproj" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".github/workflows/ci.yml" />
     <File Path="Directory.Build.props" />
     <File Path="postbuild.cs" />
   </Folder>
-  <Project Path="Installer/Installer.wixproj" Type="b7dd6f7e-def8-4e67-b5b7-07ef123db6f0">
-    <Platform Solution="*|Any CPU" Project="x64" />
-    <Build Project="false" />
-  </Project>
   <Project Path="Manager.Vanguard.Launcher/Manager.Vanguard.Launcher.csproj" />
   <Project Path="Manager.Vanguard.Common/Manager.Vanguard.Common.csproj" />
   <Project Path="Manager.Vanguard.Service/Manager.Vanguard.Service.csproj" />

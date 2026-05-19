@@ -1,0 +1,47 @@
+// Copyright (C) 2026 Matteo Dell'Acqua
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY, without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+namespace Manager.Vanguard.Common
+{
+    /// <summary>
+    /// Static class that contains various data about this product.
+    /// </summary>
+    public static class ApplicationData
+    {
+        /// <summary>
+        /// The path to the application's folder in <c>%appdata%/Local</c>.
+        /// </summary>
+        public static string Local { get; }
+
+        /// <summary>
+        /// The application's shared name.
+        /// </summary>
+        public static string AppName { get; }
+
+        static ApplicationData()
+        {
+            ArgumentNullException.ThrowIfNull(Application.CompanyName);
+            ArgumentNullException.ThrowIfNull(Application.ProductName);
+
+            AppName = Application.ProductName;
+            Local = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                Application.CompanyName,
+                Application.ProductName
+            );
+        }
+    }
+}

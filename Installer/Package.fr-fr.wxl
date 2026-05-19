@@ -3,4 +3,7 @@ This file contains the declaration of all the localizable strings.
 -->
 <WixLocalization xmlns="http://wixtoolset.org/schemas/v4/wxl" Culture="fr-FR">
   <String Id="DowngradeError" Value="A newer version of [ProductName] is already installed." />
+  <String Id="RemoveLocalFilesDialog" Value="Remove local files?" />
+  <String Id="ServiceDisplayName" Value="$(Product) Service" />
+  <String Id="ServiceDescription" Value="Background service for $(Product)" />
 </WixLocalization>

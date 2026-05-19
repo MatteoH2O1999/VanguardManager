@@ -1,15 +1,34 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
-  <Package Id="VanguardManager.Installer" Name="Vanguard Manager" Manufacturer="H2O Productions" Version="$(AssemblyVersion)">
+  <Package Id="VanguardManager.Installer" Name="$(Product)" Manufacturer="$(Company)" Version="$(AssemblyVersion)">
     <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
 
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
     <Feature Id="Main">
       <ComponentGroupRef Id="AppFiles" />
+
+      <Component>
+        <RegistryValue Id="CultureKey" Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Type="integer" Name="InstallerCultureLCID" Value="[ProductLanguage]" Action="write" />
+        <RemoveRegistryKey Id="RemoveCultureKey" Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Action="removeOnUninstall" />
+        <RemoveFile Directory="INSTALLFOLDER" Name="*.*" On="uninstall" />
+        <RemoveFolder Directory="INSTALLFOLDER" On="uninstall" />
+      </Component>
     </Feature>
 
     <WixVariable Id="WixUILicenseRtf" Value="./license.rtf" />
 
     <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+
+    <Binary Id="EventSourceCA.dll" SourceFile="!(bindpath.InstallerEventSourceCA)\InstallerEventSourceCA.CA.dll" />
+    <CustomAction Id="EventSourceCAInstall" BinaryRef="EventSourceCA.dll" DllEntry="InstallerEventSourceCA" Return="check" Execute="deferred" Impersonate="no" />
+    <CustomAction Id="EventSourceCAInstallSetData" Property="EventSourceCAInstall" Value="AppName=$(Product);Action=Install;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog)" />
+    <CustomAction Id="EventSourceCARemove" BinaryRef="EventSourceCA.dll" DllEntry="InstallerEventSourceCA" Return="check" Execute="deferred" Impersonate="no" />
+    <CustomAction Id="EventSourceCARemoveSetData" Property="EventSourceCARemove" Value="AppName=$(Product);Action=Uninstall;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog)" />
+    <InstallExecuteSequence>
+      <Custom Action="EventSourceCAInstallSetData" Before="EventSourceCAInstall" />
+      <Custom Action="EventSourceCAInstall" Before="InstallFinalize" Condition="NOT Installed" />
+      <Custom Action="EventSourceCARemoveSetData" Before="EventSourceCARemove" />
+      <Custom Action="EventSourceCARemove" Before="InstallFinalize" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
+    </InstallExecuteSequence>
   </Package>
 </Wix>
