@@ -18,9 +18,7 @@
           Start="auto"
           Account="NT SERVICE\VanguardManager"
           ErrorControl="normal"
-        >
-          <ServiceConfig ServiceSid="unrestricted" />
-        </ServiceInstall>
+        />
         <ServiceControl Id="StartService" Stop="both" Remove="uninstall" Name="VanguardManager" Wait="yes" />
       </Component>
     </ComponentGroup>
