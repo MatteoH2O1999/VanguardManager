@@ -25,6 +25,10 @@ builder.Logging.AddEventLog(options =>
 {
     options.SourceName = ApplicationData.AppName;
 });
+#if DEBUG
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Trace);
+#endif
 
 builder.Services.AddWindowsService(options =>
 {
