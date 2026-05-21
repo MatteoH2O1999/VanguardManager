@@ -32,6 +32,7 @@ namespace InstallerEventSourceCA
                 string appName = session.CustomActionData["AppName"];
                 string company = session.CustomActionData["CompanyName"];
                 string dialogString = session.CustomActionData["DialogString"];
+                string serviceName = session.CustomActionData["ServiceName"];
 
                 switch (action)
                 {

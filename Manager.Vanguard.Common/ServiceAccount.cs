@@ -24,7 +24,7 @@ namespace Manager.Vanguard.Common
 
         public ServiceAccount()
         {
-            NTAccount serviceAccount = new("NT SERVICE", "VanguardManager");
+            NTAccount serviceAccount = new("NT SERVICE", ApplicationData.ServiceName);
             try
             {
                 SID = (SecurityIdentifier)serviceAccount.Translate(typeof(SecurityIdentifier));
@@ -37,5 +37,5 @@ namespace Manager.Vanguard.Common
     }
 
     public sealed class ServiceAccountNotFoundException(IdentityNotMappedException ex)
-        : Exception("Could not find service account 'NT SERVICE/VanguardManager'", ex);
+        : Exception($"Could not find service account 'NT SERVICE/{ApplicationData.ServiceName}'", ex);
 }

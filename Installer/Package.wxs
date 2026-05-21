@@ -21,9 +21,17 @@
 
     <Binary Id="EventSourceCA.dll" SourceFile="!(bindpath.InstallerEventSourceCA)\InstallerEventSourceCA.CA.dll" />
     <CustomAction Id="EventSourceCAInstall" BinaryRef="EventSourceCA.dll" DllEntry="InstallerEventSourceCA" Return="check" Execute="deferred" Impersonate="no" />
-    <CustomAction Id="EventSourceCAInstallSetData" Property="EventSourceCAInstall" Value="AppName=$(Product);Action=Install;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog)" />
+    <CustomAction
+      Id="EventSourceCAInstallSetData"
+      Property="EventSourceCAInstall"
+      Value="AppName=$(Product);Action=Install;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog);ServiceName=$(ServiceName)"
+    />
     <CustomAction Id="EventSourceCARemove" BinaryRef="EventSourceCA.dll" DllEntry="InstallerEventSourceCA" Return="check" Execute="deferred" Impersonate="no" />
-    <CustomAction Id="EventSourceCARemoveSetData" Property="EventSourceCARemove" Value="AppName=$(Product);Action=Uninstall;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog)" />
+    <CustomAction
+      Id="EventSourceCARemoveSetData"
+      Property="EventSourceCARemove"
+      Value="AppName=$(Product);Action=Uninstall;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog);ServiceName=$(ServiceName)"
+    />
     <InstallExecuteSequence>
       <Custom Action="EventSourceCAInstallSetData" Before="EventSourceCAInstall" />
       <Custom Action="EventSourceCAInstall" Before="InstallFinalize" Condition="NOT Installed" />

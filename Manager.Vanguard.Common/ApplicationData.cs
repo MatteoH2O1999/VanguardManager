@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Reflection;
+
 namespace Manager.Vanguard.Common
 {
     /// <summary>
@@ -21,6 +23,8 @@ namespace Manager.Vanguard.Common
     /// </summary>
     public static class ApplicationData
     {
+        private const string SERVICE_NAME_METADATA_KEY = "ServiceName";
+
         /// <summary>
         /// The path to the application's folder in <c>%appdata%/Local</c>.
         /// </summary>
@@ -30,6 +34,11 @@ namespace Manager.Vanguard.Common
         /// The application's shared name.
         /// </summary>
         public static string AppName { get; }
+
+        /// <summary>
+        /// The name of the registered service as <c>NT SERVICE/ServiceName</c>.
+        /// </summary>
+        public static string ServiceName { get; }
 
         static ApplicationData()
         {
@@ -42,6 +51,34 @@ namespace Manager.Vanguard.Common
                 Application.CompanyName,
                 Application.ProductName
             );
+
+            IEnumerable<AssemblyMetadataAttribute> metadata = Assembly
+                .GetExecutingAssembly()
+                .GetCustomAttributes<AssemblyMetadataAttribute>();
+
+            AssemblyMetadataAttribute[] serviceAttributes =
+            [
+                .. metadata.Where(m => m.Key == SERVICE_NAME_METADATA_KEY),
+            ];
+            if (serviceAttributes.Length == 0)
+            {
+                throw new InvalidAssemblyMetadataException($"Metadata key {SERVICE_NAME_METADATA_KEY} not found");
+            }
+            if (serviceAttributes.Length > 1)
+            {
+                throw new InvalidAssemblyMetadataException(
+                    $"Duplicate metadata found for key {SERVICE_NAME_METADATA_KEY}"
+                );
+            }
+            string serviceName =
+                serviceAttributes[0].Value
+                ?? throw new InvalidAssemblyMetadataException(
+                    $"Metadata value for {SERVICE_NAME_METADATA_KEY} is null"
+                );
+
+            ServiceName = serviceName;
         }
     }
+
+    public sealed class InvalidAssemblyMetadataException(string error) : Exception(error);
 }

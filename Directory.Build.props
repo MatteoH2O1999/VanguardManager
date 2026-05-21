@@ -7,6 +7,7 @@
     <Authors>Matteo Dell'Acqua</Authors>
     <Company>H2O Productions</Company>
     <Product>Vanguard Manager</Product>
+    <ServiceName>VanguardManager</ServiceName>
     <PackageVersion>$(Version)</PackageVersion>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
@@ -25,6 +26,10 @@
     <GenerateRuntimeConfigurationFiles Condition="'$(Configuration)' == 'release'">false</GenerateRuntimeConfigurationFiles>
     <GenerateDependencyFile Condition="'$(Configuration)' == 'release'">false</GenerateDependencyFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="ServiceName" Value="$(ServiceName)" />
+  </ItemGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
