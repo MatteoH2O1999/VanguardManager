@@ -67,7 +67,7 @@ namespace InstallerEventSourceCA
 
                         foreach (string service in services)
                         {
-                            string sddl = GetSDDL(service);
+                            ServiceController serviceController = new(service);
                         }
 
                         break;
@@ -120,55 +120,6 @@ namespace InstallerEventSourceCA
             }
 
             return ActionResult.Success;
-        }
-
-        private static string GetSDDL(string serviceName)
-        {
-            ProcessStartInfo processStartInfo = new()
-            {
-                FileName = "sc.exe",
-                Arguments = $"sdshow {serviceName}",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            };
-            using Process process = new() { StartInfo = processStartInfo };
-
-            process.Start();
-
-            string output = process.StandardOutput.ReadToEnd();
-            string errors = process.StandardError.ReadToEnd();
-
-            process.WaitForExit();
-
-            return process.ExitCode != 0
-                ? throw new Exception($"Could not acquire SDDL for service {serviceName}: {errors}")
-                : output.Trim();
-        }
-
-        private static void SetSDDL(string serviceName, string sddl)
-        {
-            ProcessStartInfo processStartInfo = new()
-            {
-                FileName = "sc.exe",
-                Arguments = $"sdset {serviceName} {sddl}",
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            };
-            using Process process = new() { StartInfo = processStartInfo };
-
-            process.Start();
-
-            string errors = process.StandardError.ReadToEnd();
-
-            process.WaitForExit();
-
-            if (process.ExitCode != 0)
-            {
-                throw new Exception($"Could not set SDDL for service {serviceName}: {errors}");
-            }
         }
     }
 }
