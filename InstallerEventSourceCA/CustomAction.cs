@@ -65,7 +65,11 @@ namespace InstallerEventSourceCA
                             .. ServiceController.GetDevices().Select(s => s.ServiceName),
                         ];
 
-                        session.Log(string.Join(", ", services));
+                        foreach (string service in services)
+                        {
+                            string sddl = GetSDDL(service);
+                        }
+
                         break;
                     case "UninstallFinalize":
                         session.Log("Performing 'UninstallFinalize' action");
@@ -138,7 +142,33 @@ namespace InstallerEventSourceCA
 
             process.WaitForExit();
 
-            return output;
+            return process.ExitCode != 0
+                ? throw new Exception($"Could not acquire SDDL for service {serviceName}: {errors}")
+                : output.Trim();
+        }
+
+        private static void SetSDDL(string serviceName, string sddl)
+        {
+            ProcessStartInfo processStartInfo = new()
+            {
+                FileName = "sc.exe",
+                Arguments = $"sdset {serviceName} {sddl}",
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+            using Process process = new() { StartInfo = processStartInfo };
+
+            process.Start();
+
+            string errors = process.StandardError.ReadToEnd();
+
+            process.WaitForExit();
+
+            if (process.ExitCode != 0)
+            {
+                throw new Exception($"Could not set SDDL for service {serviceName}: {errors}");
+            }
         }
     }
 }
