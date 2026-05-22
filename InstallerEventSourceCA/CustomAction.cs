@@ -15,6 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Diagnostics;
+using System.Security.Principal;
+using System.ServiceProcess;
 using WixToolset.Dtf.WindowsInstaller;
 
 namespace InstallerEventSourceCA
@@ -51,8 +53,22 @@ namespace InstallerEventSourceCA
                         EventLog.CreateEventSource(appName, "Application");
 
                         break;
-                    case "Uninstall":
-                        session.Log("Performing 'Uninstall' action");
+                    case "UninstallInit":
+                        NTAccount serviceAccount = new("NT SERVICE", serviceName);
+                        SecurityIdentifier serviceAccountId = (SecurityIdentifier)
+                            serviceAccount.Translate(typeof(SecurityIdentifier));
+                        string sid = serviceAccountId.Value;
+
+                        string[] services =
+                        [
+                            .. ServiceController.GetServices().Select(s => s.ServiceName),
+                            .. ServiceController.GetDevices().Select(s => s.ServiceName),
+                        ];
+
+                        session.Log(string.Join(", ", services));
+                        break;
+                    case "UninstallFinalize":
+                        session.Log("Performing 'UninstallFinalize' action");
 
                         if (!EventLog.SourceExists(appName))
                         {
@@ -100,6 +116,29 @@ namespace InstallerEventSourceCA
             }
 
             return ActionResult.Success;
+        }
+
+        private static string GetSDDL(string serviceName)
+        {
+            ProcessStartInfo processStartInfo = new()
+            {
+                FileName = "sc.exe",
+                Arguments = $"sdshow {serviceName}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+            using Process process = new() { StartInfo = processStartInfo };
+
+            process.Start();
+
+            string output = process.StandardOutput.ReadToEnd();
+            string errors = process.StandardError.ReadToEnd();
+
+            process.WaitForExit();
+
+            return output;
         }
     }
 }

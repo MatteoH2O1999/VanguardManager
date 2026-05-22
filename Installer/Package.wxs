@@ -30,11 +30,19 @@
     <CustomAction
       Id="EventSourceCARemoveSetData"
       Property="EventSourceCARemove"
-      Value="AppName=$(Product);Action=Uninstall;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog);ServiceName=$(ServiceName)"
+      Value="AppName=$(Product);Action=UninstallFinalize;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog);ServiceName=$(ServiceName)"
+    />
+    <CustomAction Id="EventSourceCARemoveInit" BinaryRef="EventSourceCA.dll" DllEntry="InstallerEventSourceCA" Return="check" Execute="deferred" Impersonate="no" />
+    <CustomAction
+      Id="EventSourceCARemoveInitSetData"
+      Property="EventSourceCARemoveInit"
+      Value="AppName=$(Product);Action=UninstallInit;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog);ServiceName=$(ServiceName)"
     />
     <InstallExecuteSequence>
       <Custom Action="EventSourceCAInstallSetData" Before="EventSourceCAInstall" />
       <Custom Action="EventSourceCAInstall" Before="InstallFinalize" Condition="NOT Installed" />
+      <Custom Action="EventSourceCARemoveInitSetData" Before="EventSourceCARemoveInit" />
+      <Custom Action="EventSourceCARemoveInit" After="InstallInitialize" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
       <Custom Action="EventSourceCARemoveSetData" Before="EventSourceCARemove" />
       <Custom Action="EventSourceCARemove" Before="InstallFinalize" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
     </InstallExecuteSequence>
