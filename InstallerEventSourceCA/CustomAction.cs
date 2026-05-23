@@ -60,12 +60,10 @@ namespace InstallerEventSourceCA
                     case "UninstallInit":
                     {
                         NTAccount serviceAccount = new("NT SERVICE", serviceName);
-                        string sid;
+                        SecurityIdentifier sid;
                         try
                         {
-                            SecurityIdentifier serviceAccountId = (SecurityIdentifier)
-                                serviceAccount.Translate(typeof(SecurityIdentifier));
-                            sid = serviceAccountId.Value;
+                            sid = (SecurityIdentifier)serviceAccount.Translate(typeof(SecurityIdentifier));
                         }
                         catch (IdentityNotMappedException)
                         {
@@ -89,9 +87,18 @@ namespace InstallerEventSourceCA
                         foreach (string service in services)
                         {
                             CommonSecurityDescriptor permissions = GetServiceSecurityDescriptor(service, scm);
-                            session.Log(
-                                $"Permissions for service {service}: {permissions.GetSddlForm(AccessControlSections.All)}"
-                            );
+                            string oldSddl = permissions.GetSddlForm(AccessControlSections.All);
+                            permissions.DiscretionaryAcl.Purge(sid);
+                            string newSddl = permissions.GetSddlForm(AccessControlSections.All);
+                            if (oldSddl != newSddl)
+                            {
+                                session.Log($"Clean permissions for service {service}");
+                                SetServiceSecurityDescriptor(service, scm, permissions);
+                            }
+                            else
+                            {
+                                session.Log($"Permissions for service {service} are already clean");
+                            }
                         }
 
                         break;
