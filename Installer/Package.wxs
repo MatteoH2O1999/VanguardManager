@@ -18,6 +18,7 @@
     <WixVariable Id="WixUILicenseRtf" Value="./license.rtf" />
 
     <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <UIRef Id="WixUI_ErrorProgressText" />
 
     <Binary Id="EventSourceCA.dll" SourceFile="!(bindpath.InstallerEventSourceCA)\InstallerEventSourceCA.CA.dll" />
     <CustomAction Id="EventSourceCAInstall" BinaryRef="EventSourceCA.dll" DllEntry="InstallerEventSourceCA" Return="check" Execute="deferred" Impersonate="no" />
