@@ -37,6 +37,8 @@ namespace InstallerEventSourceCA
                 string company = session.CustomActionData["CompanyName"];
                 string dialogString = session.CustomActionData["DialogString"];
                 string serviceName = session.CustomActionData["ServiceName"];
+                string serviceCleanupString = session.CustomActionData["ServiceCleanupString"];
+                string serviceCleanupTemplate = serviceCleanupString.Replace("...", ": [1]");
 
                 switch (action)
                 {
@@ -59,6 +61,14 @@ namespace InstallerEventSourceCA
                     }
                     case "UninstallInit":
                     {
+                        using (Record rec = new(3))
+                        {
+                            rec[1] = "Clean service permissions";
+                            rec[2] = serviceCleanupString;
+                            rec[3] = serviceCleanupTemplate;
+                            session.Message(InstallMessage.ActionStart, rec);
+                        }
+
                         NTAccount serviceAccount = new("NT SERVICE", serviceName);
                         SecurityIdentifier sid;
                         try
@@ -71,11 +81,44 @@ namespace InstallerEventSourceCA
                             return ActionResult.Failure;
                         }
 
+                        using (Record rec = new(4))
+                        {
+                            rec[1] = 0;
+                            rec[2] = 1;
+                            rec[3] = 0;
+                            rec[4] = 0;
+                            session.Message(InstallMessage.Progress, rec);
+                        }
+
                         string[] services =
                         [
                             .. ServiceController.GetServices().Select(s => s.ServiceName),
                             .. ServiceController.GetDevices().Select(s => s.ServiceName),
                         ];
+
+                        using (Record rec = new(2))
+                        {
+                            rec[1] = 2;
+                            rec[2] = 1;
+                            session.Message(InstallMessage.Progress, rec);
+                        }
+
+                        using (Record rec = new(4))
+                        {
+                            rec[1] = 0;
+                            rec[2] = services.Length;
+                            rec[3] = 0;
+                            rec[4] = 0;
+                            session.Message(InstallMessage.Progress, rec);
+                        }
+
+                        using (Record rec = new(3))
+                        {
+                            rec[1] = 1;
+                            rec[2] = 1;
+                            rec[3] = 1;
+                            session.Message(InstallMessage.Progress, rec);
+                        }
 
                         using SafeSC_HANDLE scm = OpenSCManager(null, null, ScManagerAccessTypes.SC_MANAGER_CONNECT);
                         if (scm.IsInvalid)
@@ -99,6 +142,10 @@ namespace InstallerEventSourceCA
                             {
                                 session.Log($"Permissions for service {service} are already clean");
                             }
+
+                            using Record rec = new(1);
+                            rec[1] = service;
+                            session.Message(InstallMessage.ActionData, rec);
                         }
 
                         break;

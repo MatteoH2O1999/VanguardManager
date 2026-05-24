@@ -6,4 +6,5 @@ This file contains the declaration of all the localizable strings.
   <String Id="RemoveLocalFilesDialog" Value="Rimuovere file locali?" />
   <String Id="ServiceDisplayName" Value="$(Product) Service" />
   <String Id="ServiceDescription" Value="Servizio in background per $(Product)" />
+  <String Id="ServiceCleanup" Value="Rimozione permessi del servizio di $(Product)..." />
 </WixLocalization>
