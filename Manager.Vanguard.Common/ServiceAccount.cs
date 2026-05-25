@@ -21,10 +21,12 @@ namespace Manager.Vanguard.Common
     public sealed class ServiceAccount
     {
         public SecurityIdentifier SID { get; }
+        public string FullName { get; }
 
         public ServiceAccount()
         {
             NTAccount serviceAccount = new("NT SERVICE", ApplicationData.ServiceName);
+            FullName = serviceAccount.Value;
             try
             {
                 SID = (SecurityIdentifier)serviceAccount.Translate(typeof(SecurityIdentifier));

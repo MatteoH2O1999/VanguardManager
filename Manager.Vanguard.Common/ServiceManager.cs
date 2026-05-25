@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.ServiceProcess;
 using Microsoft.Extensions.Logging;
 using Vanara.PInvoke;
 using static Vanara.PInvoke.AdvApi32;
@@ -103,9 +102,41 @@ namespace Manager.Vanguard.Common
             this.LogStopped(serviceName);
         }
 
-        public void SetStart(string serviceName, ServiceStartMode startMode)
+        public void SetStart(string serviceName, ServiceStartType startMode)
         {
-            throw new NotImplementedException();
+            if (startMode == ServiceStartType.SERVICE_NO_CHANGE)
+            {
+                throw new ArgumentException("Do not call this method if not changing the start type");
+            }
+
+            this.LogSetStart(serviceName, startMode);
+            using var service = OpenService(this.scm, serviceName, ServiceAccessTypes.SERVICE_CHANGE_CONFIG);
+            if (service.IsInvalid)
+            {
+                Exception ex =
+                    Win32Error.GetLastError().GetException()
+                    ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
+                this.LogSetStartInvalidHandle(serviceName, ex);
+                throw new ServiceManagerException(ex);
+            }
+            if (
+                !ChangeServiceConfig(
+                    service,
+                    ServiceTypes.SERVICE_NO_CHANGE,
+                    startMode,
+                    ServiceErrorControlType.SERVICE_NO_CHANGE
+                )
+            )
+            {
+                Exception ex =
+                    Win32Error.GetLastError().GetException()
+                    ?? throw new ServiceManagerException(
+                        "Service config was not changed: last error must be a failure"
+                    );
+                this.LogSetStartError(serviceName, startMode, ex);
+                throw new ServiceManagerException(ex);
+            }
+            this.LogSetStartCompleted(serviceName, startMode);
         }
 
         public bool CheckPermissions(string serviceName)
@@ -151,7 +182,7 @@ namespace Manager.Vanguard.Common
         [LoggerMessage(LogLevel.Trace, "Opening handle to SCM")]
         private partial void LogOpenSCM();
 
-        [LoggerMessage(LogLevel.Error, "Error while opening handle SCM")]
+        [LoggerMessage(LogLevel.Error, "Error while opening handle to SCM")]
         private partial void LogErrorOpenSCM(Exception ex);
 
         [LoggerMessage(LogLevel.Trace, "Handle to SCM successfully opened")]
@@ -166,7 +197,7 @@ namespace Manager.Vanguard.Common
 
         [LoggerMessage(
             LogLevel.Error,
-            "Error while opening handle to service {serviceName} with desired access SERVICE_START"
+            $"Error while opening handle to service {{serviceName}} with desired access {nameof(ServiceAccessTypes.SERVICE_START)}"
         )]
         private partial void LogStartInvalidHandle(string serviceName, Exception ex);
 
@@ -185,7 +216,7 @@ namespace Manager.Vanguard.Common
 
         [LoggerMessage(
             LogLevel.Error,
-            "Error while opening handle to service {serviceName} with desired access SERVICE_STOP"
+            $"Error while opening handle to service {{serviceName}} with desired access {nameof(ServiceAccessTypes.SERVICE_STOP)}"
         )]
         private partial void LogStopInvalidHandle(string serviceName, Exception ex);
 
@@ -194,6 +225,25 @@ namespace Manager.Vanguard.Common
 
         [LoggerMessage(LogLevel.Debug, "Service {serviceName} successfully stopped")]
         private partial void LogStopped(string serviceName);
+
+        #endregion
+
+        #region SetStart Logging
+
+        [LoggerMessage(LogLevel.Debug, "Setting start mode of service {serviceName} to {startType}")]
+        private partial void LogSetStart(string serviceName, ServiceStartType startType);
+
+        [LoggerMessage(
+            LogLevel.Error,
+            $"Error while opening handle to service {{serviceName}} with desired access {nameof(ServiceAccessTypes.SERVICE_CHANGE_CONFIG)}"
+        )]
+        private partial void LogSetStartInvalidHandle(string serviceName, Exception ex);
+
+        [LoggerMessage(LogLevel.Error, "Error while setting start mode of service {serviceName} to {startType}")]
+        private partial void LogSetStartError(string serviceName, ServiceStartType startType, Exception ex);
+
+        [LoggerMessage(LogLevel.Debug, "Start mode of service {serviceName} successfully set to {startType}")]
+        private partial void LogSetStartCompleted(string serviceName, ServiceStartType startType);
 
         #endregion
     }
