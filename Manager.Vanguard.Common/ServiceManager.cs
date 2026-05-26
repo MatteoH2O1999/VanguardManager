@@ -141,7 +141,21 @@ namespace Manager.Vanguard.Common
 
         public bool CheckPermissions(string serviceName)
         {
-            throw new NotImplementedException();
+            this.LogCheckPermissions(serviceName);
+            using var service = OpenService(
+                this.scm,
+                serviceName,
+                ServiceAccessTypes.SERVICE_START
+                    | ServiceAccessTypes.SERVICE_STOP
+                    | ServiceAccessTypes.SERVICE_CHANGE_CONFIG
+            );
+            if (service.IsInvalid)
+            {
+                this.LogCheckedPermissionsFalse(serviceName);
+                return false;
+            }
+            this.LogCheckedPermissionsTrue(serviceName);
+            return true;
         }
 
         public void SetPermissions(string serviceName)
@@ -244,6 +258,34 @@ namespace Manager.Vanguard.Common
 
         [LoggerMessage(LogLevel.Debug, "Start mode of service {serviceName} successfully set to {startType}")]
         private partial void LogSetStartCompleted(string serviceName, ServiceStartType startType);
+
+        #endregion
+
+        #region CheckPermissions Logging
+
+        [LoggerMessage(
+            LogLevel.Debug,
+            "Checking whether current account can open handle to service {serviceName} with permissions "
+                + $"{nameof(ServiceAccessTypes.SERVICE_START)}, {nameof(ServiceAccessTypes.SERVICE_STOP)} "
+                + $"and {nameof(ServiceAccessTypes.SERVICE_CHANGE_CONFIG)}"
+        )]
+        private partial void LogCheckPermissions(string serviceName);
+
+        [LoggerMessage(
+            LogLevel.Debug,
+            "Current account can open handle to service {serviceName} with permissions"
+                + $"{nameof(ServiceAccessTypes.SERVICE_START)}, {nameof(ServiceAccessTypes.SERVICE_STOP)} "
+                + $"and {nameof(ServiceAccessTypes.SERVICE_CHANGE_CONFIG)}"
+        )]
+        private partial void LogCheckedPermissionsTrue(string serviceName);
+
+        [LoggerMessage(
+            LogLevel.Debug,
+            "Current account can't open handle to service {serviceName} with permissions"
+                + $"{nameof(ServiceAccessTypes.SERVICE_START)}, {nameof(ServiceAccessTypes.SERVICE_STOP)} "
+                + $"and {nameof(ServiceAccessTypes.SERVICE_CHANGE_CONFIG)}"
+        )]
+        private partial void LogCheckedPermissionsFalse(string serviceName);
 
         #endregion
     }
