@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Security.AccessControl;
+using System.Security.Principal;
 using Microsoft.Extensions.Logging;
 using Vanara.PInvoke;
 using static Vanara.PInvoke.AdvApi32;
@@ -158,9 +160,58 @@ namespace Manager.Vanguard.Common
             return true;
         }
 
-        public void SetPermissions(string serviceName)
+        private CommonSecurityDescriptor GetPermissions(string serviceName)
         {
-            throw new NotSupportedException();
+            throw new NotImplementedException();
+        }
+
+        private void SetPermissionsInternal(string serviceName, string SDDL)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetServicePermissions(string serviceName)
+        {
+            this.SetPermissions(serviceName, this.serviceAccount.SID);
+        }
+
+        public void SetCurrentAccountPermissions(string serviceName)
+        {
+            this.SetPermissions(
+                serviceName,
+                WindowsIdentity.GetCurrent().User
+                    ?? throw new ServiceManagerException("Could not obtain current user SID")
+            );
+        }
+
+        public void SetPermissions(string serviceName, SecurityIdentifier sid)
+        {
+            CommonSecurityDescriptor currentPermissions = this.GetPermissions(serviceName);
+            string currentSddl = currentPermissions.GetSddlForm(AccessControlSections.All);
+
+            DiscretionaryAcl dacl =
+                currentPermissions.DiscretionaryAcl ?? throw new ServiceManagerException("DACL cannot be null");
+            dacl.Purge(sid);
+            dacl.AddAccess(
+                AccessControlType.Allow,
+                sid,
+                (int)(
+                    ServiceAccessRights.SERVICE_STOP
+                    | ServiceAccessRights.SERVICE_START
+                    | ServiceAccessRights.SERVICE_CHANGE_CONFIG
+                ),
+                InheritanceFlags.None,
+                PropagationFlags.None
+            );
+
+            string newSddl = currentPermissions.GetSddlForm(AccessControlSections.All);
+
+            if (currentSddl == newSddl)
+            {
+                return;
+            }
+
+            this.SetPermissionsInternal(serviceName, newSddl);
         }
 
         public void Dispose()
