@@ -186,8 +186,11 @@ namespace Manager.Vanguard.Common
 
         public void SetPermissions(string serviceName, SecurityIdentifier sid)
         {
+            this.LogSetPermissions(serviceName, sid);
+
             CommonSecurityDescriptor currentPermissions = this.GetPermissions(serviceName);
             string currentSddl = currentPermissions.GetSddlForm(AccessControlSections.All);
+            this.LogSetPermissionsCurrentSDDL(serviceName, currentSddl);
 
             DiscretionaryAcl dacl =
                 currentPermissions.DiscretionaryAcl ?? throw new ServiceManagerException("DACL cannot be null");
@@ -205,13 +208,17 @@ namespace Manager.Vanguard.Common
             );
 
             string newSddl = currentPermissions.GetSddlForm(AccessControlSections.All);
+            this.LogSetPermissionsNewSDDL(serviceName, newSddl);
 
             if (currentSddl == newSddl)
             {
+                this.LogSetPermissionsSkip(serviceName, sid);
                 return;
             }
 
+            this.LogSetPermissionsPerform(serviceName);
             this.SetPermissionsInternal(serviceName, newSddl);
+            this.LogSetPermissionsSuccess(serviceName, sid);
         }
 
         public void Dispose()
@@ -337,6 +344,40 @@ namespace Manager.Vanguard.Common
                 + $"and {nameof(ServiceAccessTypes.SERVICE_CHANGE_CONFIG)}"
         )]
         private partial void LogCheckedPermissionsFalse(string serviceName);
+
+        #endregion
+
+        #region SetPermissions Logging
+
+        [LoggerMessage(
+            LogLevel.Debug,
+            $"Setting permissions {nameof(ServiceAccessRights.SERVICE_START)}, {nameof(ServiceAccessRights.SERVICE_STOP)} "
+                + $"and {nameof(ServiceAccessRights.SERVICE_CHANGE_CONFIG)} for account {{sid}} on service {{serviceName}}"
+        )]
+        private partial void LogSetPermissions(string serviceName, SecurityIdentifier sid);
+
+        [LoggerMessage(LogLevel.Debug, "Current DACL for service {serviceName}: {sddl}")]
+        private partial void LogSetPermissionsCurrentSDDL(string serviceName, string sddl);
+
+        [LoggerMessage(LogLevel.Debug, "New DACL for service {serviceName}: {sddl}")]
+        private partial void LogSetPermissionsNewSDDL(string serviceName, string sddl);
+
+        [LoggerMessage(
+            LogLevel.Trace,
+            "Adding the required permissions for account {sid} on service {serviceName} would not modify DACL. Skipping"
+        )]
+        private partial void LogSetPermissionsSkip(string serviceName, SecurityIdentifier sid);
+
+        [LoggerMessage(LogLevel.Trace, "Setting new DACL for service {serviceName}")]
+        private partial void LogSetPermissionsPerform(string serviceName);
+
+        [LoggerMessage(
+            LogLevel.Debug,
+            $"Permissions {nameof(ServiceAccessRights.SERVICE_START)}, {nameof(ServiceAccessRights.SERVICE_STOP)} "
+                + $"and {nameof(ServiceAccessRights.SERVICE_CHANGE_CONFIG)} for account {{sid}} on service "
+                + "{serviceName} successfully set"
+        )]
+        private partial void LogSetPermissionsSuccess(string serviceName, SecurityIdentifier sid);
 
         #endregion
     }
