@@ -20,7 +20,6 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <ImplicitUsings>true</ImplicitUsings>
     <SelfContained>true</SelfContained>
-    <PublishReadyToRun>true</PublishReadyToRun>
     <UseWindowsForms>true</UseWindowsForms>
     <DebugSymbols Condition="'$(Configuration)' == 'release'">false</DebugSymbols>
     <GenerateRuntimeConfigurationFiles Condition="'$(Configuration)' == 'release'">false</GenerateRuntimeConfigurationFiles>

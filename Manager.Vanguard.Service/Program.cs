@@ -32,7 +32,7 @@ builder.Logging.SetMinimumLevel(LogLevel.Trace);
 
 builder.Services.AddWindowsService(options =>
 {
-    options.ServiceName = ApplicationData.AppName;
+    options.ServiceName = ApplicationData.ServiceName;
 });
 
 builder.Services.AddHostedService<Worker>();
