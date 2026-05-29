@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using Microsoft.Extensions.Logging;
@@ -40,7 +41,7 @@ namespace Manager.Vanguard.Common
             if (this.scm.IsInvalid)
             {
                 Exception ex =
-                    Win32Error.GetLastError().GetException()
+                    Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException(
                         "Service manager handle is invalid: last error MUST be a failure."
                     );
@@ -53,38 +54,43 @@ namespace Manager.Vanguard.Common
         public void Start(string serviceName)
         {
             this.LogStart(serviceName);
+
             using var service = OpenService(this.scm, serviceName, ServiceAccessTypes.SERVICE_START);
             if (service.IsInvalid)
             {
                 Exception ex =
-                    Win32Error.GetLastError().GetException()
+                    Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
                 this.LogStartInvalidHandle(serviceName, ex);
                 throw new ServiceManagerException(ex);
             }
+
             if (!StartService(service))
             {
                 Exception ex =
-                    Win32Error.GetLastError().GetException()
+                    Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service was not started: last error must be a failure");
                 this.LogStartError(serviceName, ex);
                 throw new ServiceManagerException(ex);
             }
+
             this.LogStarted(serviceName);
         }
 
         public void Stop(string serviceName)
         {
             this.LogStop(serviceName);
+
             using var service = OpenService(this.scm, serviceName, ServiceAccessTypes.SERVICE_STOP);
             if (service.IsInvalid)
             {
                 Exception ex =
-                    Win32Error.GetLastError().GetException()
+                    Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
                 this.LogStopInvalidHandle(serviceName, ex);
                 throw new ServiceManagerException(ex);
             }
+
             SERVICE_CONTROL_STATUS_REASON_PARAMS reason = new()
             {
                 dwReason =
@@ -96,11 +102,12 @@ namespace Manager.Vanguard.Common
             if (!StopService(service, ref reason))
             {
                 Exception ex =
-                    Win32Error.GetLastError().GetException()
+                    Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service was not stopped: last error must be a failure");
                 this.LogStopError(serviceName, ex);
                 throw new ServiceManagerException(ex);
             }
+
             this.LogStopped(serviceName);
         }
 
@@ -112,15 +119,17 @@ namespace Manager.Vanguard.Common
             }
 
             this.LogSetStart(serviceName, startMode);
+
             using var service = OpenService(this.scm, serviceName, ServiceAccessTypes.SERVICE_CHANGE_CONFIG);
             if (service.IsInvalid)
             {
                 Exception ex =
-                    Win32Error.GetLastError().GetException()
+                    Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
                 this.LogSetStartInvalidHandle(serviceName, ex);
                 throw new ServiceManagerException(ex);
             }
+
             if (
                 !ChangeServiceConfig(
                     service,
@@ -131,19 +140,21 @@ namespace Manager.Vanguard.Common
             )
             {
                 Exception ex =
-                    Win32Error.GetLastError().GetException()
+                    Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException(
                         "Service config was not changed: last error must be a failure"
                     );
                 this.LogSetStartError(serviceName, startMode, ex);
                 throw new ServiceManagerException(ex);
             }
+
             this.LogSetStartCompleted(serviceName, startMode);
         }
 
         public bool CheckPermissions(string serviceName)
         {
             this.LogCheckPermissions(serviceName);
+
             using var service = OpenService(
                 this.scm,
                 serviceName,
@@ -151,6 +162,7 @@ namespace Manager.Vanguard.Common
                     | ServiceAccessTypes.SERVICE_STOP
                     | ServiceAccessTypes.SERVICE_CHANGE_CONFIG
             );
+
             if (service.IsInvalid)
             {
                 this.LogCheckedPermissionsFalse(serviceName);
@@ -162,7 +174,63 @@ namespace Manager.Vanguard.Common
 
         private CommonSecurityDescriptor GetPermissions(string serviceName)
         {
-            throw new NotImplementedException();
+            this.LogGetPermissions(serviceName);
+
+            using var service = OpenService(
+                this.scm,
+                serviceName,
+                (ServiceAccessTypes)ServiceAccessRights.READ_CONTROL
+            );
+            if (service.IsInvalid)
+            {
+                Exception ex =
+                    Win32Error.GetExceptionForLastError()
+                    ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
+                this.LogGetPermissionsInvalidHandle(serviceName, ex);
+                throw new ServiceManagerException(ex);
+            }
+
+            if (!QueryServiceObjectSecurity(service, SECURITY_INFORMATION.DACL_SECURITY_INFORMATION, out var secRes))
+            {
+                Exception ex =
+                    Win32Error.GetExceptionForLastError()
+                    ?? throw new ServiceManagerException(
+                        "Could not query service object security: last error must be a failure"
+                    );
+                this.LogGetPermissionsError(serviceName, ex);
+                throw new ServiceManagerException(ex);
+            }
+
+            using var securityObject = secRes;
+            if (
+                !ConvertSecurityDescriptorToStringSecurityDescriptor(
+                    secRes,
+                    SDDL_REVISION.SDDL_REVISION_1,
+                    SECURITY_INFORMATION.DACL_SECURITY_INFORMATION,
+                    out var stringSecRes,
+                    out uint len
+                )
+            )
+            {
+                Exception ex =
+                    Win32Error.GetExceptionForLastError()
+                    ?? throw new ServiceManagerException(
+                        "Could not convert security descriptor to string handle: last error must be a failure"
+                    );
+                this.LogGetPermissionsConvertError(serviceName, ex);
+                throw new ServiceManagerException(ex);
+            }
+
+            using var stringSecurityObject = stringSecRes;
+            string? sddl = stringSecurityObject.ToString((int)len, CharSet.Auto);
+            if (sddl is null)
+            {
+                this.LogGetPermissionsToStringError(serviceName);
+                throw new ServiceManagerException("Could not convert string handle to string");
+            }
+            this.LogGetPermissionsSuccess(serviceName, sddl);
+
+            return new(false, false, sddl);
         }
 
         private void SetPermissionsInternal(string serviceName, string SDDL)
@@ -344,6 +412,37 @@ namespace Manager.Vanguard.Common
                 + $"and {nameof(ServiceAccessTypes.SERVICE_CHANGE_CONFIG)}"
         )]
         private partial void LogCheckedPermissionsFalse(string serviceName);
+
+        #endregion
+
+        #region GetPermissions Logging
+
+        [LoggerMessage(LogLevel.Debug, "Getting security descriptor from service {serviceName}")]
+        private partial void LogGetPermissions(string serviceName);
+
+        [LoggerMessage(
+            LogLevel.Error,
+            $"Error while opening handle to service {{serviceName}} with desired access {nameof(ServiceAccessRights.READ_CONTROL)}"
+        )]
+        private partial void LogGetPermissionsInvalidHandle(string serviceName, Exception ex);
+
+        [LoggerMessage(LogLevel.Error, "Error while getting security descriptor from service {serviceName}")]
+        private partial void LogGetPermissionsError(string serviceName, Exception ex);
+
+        [LoggerMessage(
+            LogLevel.Error,
+            "Error while converting security descriptor from service {serviceName} to string"
+        )]
+        private partial void LogGetPermissionsConvertError(string serviceName, Exception ex);
+
+        [LoggerMessage(
+            LogLevel.Error,
+            "Error while converting string security description handle from service {serviceName} into string"
+        )]
+        private partial void LogGetPermissionsToStringError(string serviceName);
+
+        [LoggerMessage(LogLevel.Debug, "Successfully retrieved security descriptor from service {serviceName}: {sddl}")]
+        private partial void LogGetPermissionsSuccess(string serviceName, string sddl);
 
         #endregion
 
