@@ -14,13 +14,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.Logging;
+
 namespace Manager.Vanguard.Launcher
 {
-    public partial class Form1 : Form
+    public sealed partial class Runner(ILogger<Runner> Logger)
     {
-        public Form1()
+        private readonly ILogger logger = Logger;
+
+        public void Run(string[] args)
         {
-            this.InitializeComponent();
+            ApplicationConfiguration.Initialize();
+            this.LogRun();
         }
+
+        [LoggerMessage(LogLevel.Warning, "TODO: Implement runner")]
+        private partial void LogRun();
     }
 }
