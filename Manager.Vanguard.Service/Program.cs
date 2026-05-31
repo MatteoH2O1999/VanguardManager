@@ -28,6 +28,8 @@ builder.Logging.AddEventLog(options =>
 #if DEBUG
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Trace);
+#else
+builder.Logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Warning);
 #endif
 
 builder.Services.AddWindowsService(options =>
