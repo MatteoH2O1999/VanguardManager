@@ -26,7 +26,7 @@ namespace Manager.Vanguard.Common
             where T : ILoggingBuilder
         {
             logging.AddFile(
-                $"{ApplicationData.Local}/logs/{appName}-{{Date}}.log",
+                $"{ApplicationData.AppData}/logs/{appName}-{{Date}}.log",
                 minimumLevel: LogLevel.Information,
                 retainedFileCountLimit: 31,
                 fileSizeLimitBytes: MAX_FILE_SIZE,

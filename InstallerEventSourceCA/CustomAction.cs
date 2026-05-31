@@ -175,11 +175,11 @@ namespace InstallerEventSourceCA
                             ) == MessageResult.Yes
                         )
                         {
-                            string localFilesPath = Path.Combine(
-                                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                                company,
-                                appName
+                            string manufacturerPath = Path.Combine(
+                                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                                company
                             );
+                            string localFilesPath = Path.Combine(manufacturerPath, appName);
                             session.Log($"Deleting local files from {localFilesPath}");
                             DirectoryInfo localFiles = new(localFilesPath);
                             if (!localFiles.Exists)
@@ -190,6 +190,9 @@ namespace InstallerEventSourceCA
                             {
                                 localFiles.Delete(true);
                             }
+                            session.Log("Deleting manufacturer folder if empty");
+                            DirectoryInfo manufacturerDir = new(manufacturerPath);
+                            manufacturerDir.Delete();
                         }
 
                         break;

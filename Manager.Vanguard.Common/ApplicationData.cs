@@ -26,9 +26,9 @@ namespace Manager.Vanguard.Common
         private const string SERVICE_NAME_METADATA_KEY = "ServiceName";
 
         /// <summary>
-        /// The path to the application's folder in <c>%appdata%/Local</c>.
+        /// The path to the shared application data folder.
         /// </summary>
-        public static string Local { get; }
+        public static string AppData { get; }
 
         /// <summary>
         /// The application's shared name.
@@ -46,8 +46,8 @@ namespace Manager.Vanguard.Common
             ArgumentNullException.ThrowIfNull(Application.ProductName);
 
             AppName = Application.ProductName;
-            Local = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            AppData = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
                 Application.CompanyName,
                 Application.ProductName
             );
