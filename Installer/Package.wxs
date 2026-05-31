@@ -7,11 +7,17 @@
     <Feature Id="Main">
       <ComponentGroupRef Id="AppFiles" />
 
-      <Component>
+      <Component Id="RegistryUtils">
         <RegistryValue Id="CultureKey" Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Type="integer" Name="InstallerCultureLCID" Value="[ProductLanguage]" Action="write" />
-        <RemoveRegistryKey Id="RemoveCultureKey" Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Action="removeOnUninstall" />
-        <RemoveFile Directory="INSTALLFOLDER" Name="*.*" On="uninstall" />
-        <RemoveFolder Directory="INSTALLFOLDER" On="uninstall" />
+        <RegistryValue
+          Id="Startup"
+          Root="HKLM"
+          Key="Software\Microsoft\Windows\CurrentVersion\Run"
+          Name="$(Product)"
+          Value="&quot;[INSTALLFOLDER]launcher.exe&quot; startup"
+          Type="string"
+          Action="write"
+        />
 
         <CreateFolder Directory="APPDATAFOLDER">
           <util:PermissionEx User="Users" GenericRead="true" GenericWrite="true" GenericExecute="true" />

@@ -25,10 +25,10 @@ namespace Manager.Vanguard.Launcher
         public void Run(string[] args)
         {
             ApplicationConfiguration.Initialize();
-            this.LogRun();
+            this.LogRun(args);
         }
 
-        [LoggerMessage(LogLevel.Warning, "TODO: Implement runner")]
-        private partial void LogRun();
+        [LoggerMessage(LogLevel.Warning, "TODO: Implement runner for args [{args}]")]
+        private partial void LogRun(string[] args);
     }
 }
