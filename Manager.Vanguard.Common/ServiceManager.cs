@@ -43,7 +43,7 @@ namespace Manager.Vanguard.Common
                 Exception ex =
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException(
-                        "Service manager handle is invalid: last error MUST be a failure."
+                        "Service manager handle is invalid: last error must be a failure."
                     );
                 this.LogErrorOpenSCM(ex);
                 throw new ServiceManagerException(ex);
