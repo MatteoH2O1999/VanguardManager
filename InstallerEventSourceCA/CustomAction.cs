@@ -154,19 +154,16 @@ namespace InstallerEventSourceCA
                     {
                         session.Log("Performing 'UninstallFinalize' action");
 
-                        if (!EventLog.SourceExists(appName))
-                        {
-                            session.Log(
-                                $"Failed InstallerEventSourceCA: source '{appName}' does not exist. "
-                                    + $"{appName} is probably already uninstalled or the installation was corrupted."
-                            );
-                            return ActionResult.Failure;
-                        }
-                        session.Log($"Deleting event source '{appName}'");
-                        EventLog.DeleteEventSource(appName);
+                        string manufacturerPath = Path.Combine(
+                            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                            company
+                        );
+                        string localFilesPath = Path.Combine(manufacturerPath, appName);
+                        DirectoryInfo localFiles = new(localFilesPath);
 
                         if (
-                            session.Message(
+                            localFiles.Exists
+                            && session.Message(
                                 InstallMessage.User
                                     | (InstallMessage)MessageBoxButtons.YesNo
                                     | (InstallMessage)MessageIcon.None
@@ -175,13 +172,7 @@ namespace InstallerEventSourceCA
                             ) == MessageResult.Yes
                         )
                         {
-                            string manufacturerPath = Path.Combine(
-                                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-                                company
-                            );
-                            string localFilesPath = Path.Combine(manufacturerPath, appName);
                             session.Log($"Deleting local files from {localFilesPath}");
-                            DirectoryInfo localFiles = new(localFilesPath);
                             if (!localFiles.Exists)
                             {
                                 session.Log("Directory does not exist. Already deleted");
@@ -194,6 +185,17 @@ namespace InstallerEventSourceCA
                             DirectoryInfo manufacturerDir = new(manufacturerPath);
                             manufacturerDir.Delete();
                         }
+
+                        if (!EventLog.SourceExists(appName))
+                        {
+                            session.Log(
+                                $"Failed InstallerEventSourceCA: source '{appName}' does not exist. "
+                                    + $"{appName} is probably already uninstalled or the installation was corrupted."
+                            );
+                            return ActionResult.Failure;
+                        }
+                        session.Log($"Deleting event source '{appName}'");
+                        EventLog.DeleteEventSource(appName);
 
                         break;
                     }
