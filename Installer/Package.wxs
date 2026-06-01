@@ -24,6 +24,11 @@
           <util:PermissionEx User="NT SERVICE\$(ServiceName)" GenericRead="true" GenericWrite="true" GenericExecute="true" />
         </CreateFolder>
       </Component>
+
+      <Component Id="DesktopShortcut" NeverOverwrite="true">
+        <RegistryValue Id="DesktopShortcutKey" Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Type="integer" Name="ShortcutInstalled" Value="1" Action="write" KeyPath="true" />
+        <Shortcut Id="Shortcut" Directory="DesktopFolder" Target="[INSTALLFOLDER]launcher.exe" Name="$(Product)" />
+      </Component>
     </Feature>
 
     <WixVariable Id="WixUILicenseRtf" Value="./license.rtf" />
