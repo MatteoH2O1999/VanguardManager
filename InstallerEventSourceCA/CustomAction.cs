@@ -46,6 +46,79 @@ namespace InstallerEventSourceCA
                     {
                         session.Log("Performing 'Install' action");
 
+                        string[] services =
+                        [
+                            .. ServiceController.GetServices().Select(s => s.ServiceName),
+                            .. ServiceController.GetDevices().Select(s => s.ServiceName),
+                        ];
+
+                        if (services.Contains("vgk") && services.Contains("vgc"))
+                        {
+                            session.Log("Assigning permissions to service account");
+
+                            NTAccount serviceAccount = new("NT SERVICE", serviceName);
+                            SecurityIdentifier sid;
+                            try
+                            {
+                                sid = (SecurityIdentifier)serviceAccount.Translate(typeof(SecurityIdentifier));
+                            }
+                            catch (IdentityNotMappedException)
+                            {
+                                session.Log("Service is not installed");
+                                return ActionResult.Failure;
+                            }
+
+                            using SafeSC_HANDLE scm = OpenSCManager(
+                                null,
+                                null,
+                                ScManagerAccessTypes.SC_MANAGER_CONNECT
+                            );
+                            if (scm.IsInvalid)
+                            {
+                                session.Log("Could not connect to service manager");
+                                return ActionResult.Failure;
+                            }
+
+                            CommonSecurityDescriptor vgkSec = GetServiceSecurityDescriptor("vgk", scm);
+                            DiscretionaryAcl vgkDacl =
+                                vgkSec.DiscretionaryAcl ?? throw new Exception("DACL cannot be null");
+                            vgkDacl.Purge(sid);
+                            vgkDacl.AddAccess(
+                                AccessControlType.Allow,
+                                sid,
+                                (int)(
+                                    ServiceAccessRights.SERVICE_STOP
+                                    | ServiceAccessRights.SERVICE_START
+                                    | ServiceAccessRights.SERVICE_CHANGE_CONFIG
+                                ),
+                                InheritanceFlags.None,
+                                PropagationFlags.None
+                            );
+
+                            CommonSecurityDescriptor vgcSec = GetServiceSecurityDescriptor("vgc", scm);
+                            DiscretionaryAcl vgcDacl =
+                                vgcSec.DiscretionaryAcl ?? throw new Exception("DACL cannot be null");
+                            vgcDacl.Purge(sid);
+                            vgcDacl.AddAccess(
+                                AccessControlType.Allow,
+                                sid,
+                                (int)(
+                                    ServiceAccessRights.SERVICE_STOP
+                                    | ServiceAccessRights.SERVICE_START
+                                    | ServiceAccessRights.SERVICE_CHANGE_CONFIG
+                                ),
+                                InheritanceFlags.None,
+                                PropagationFlags.None
+                            );
+
+                            SetServiceSecurityDescriptor("vgk", scm, vgkSec);
+                            SetServiceSecurityDescriptor("vgc", scm, vgcSec);
+                        }
+                        else
+                        {
+                            session.Log("Vanguard is not installed. Skipping permissions");
+                        }
+
                         if (EventLog.SourceExists(appName))
                         {
                             session.Log(
