@@ -371,83 +371,86 @@ namespace Manager.Vanguard.Common
 
         #region Dispose Logging
 
-        [LoggerMessage(LogLevel.Trace, $"{nameof(ServiceManager)} already disposed")]
+        [LoggerMessage(1000, LogLevel.Trace, $"{nameof(ServiceManager)} already disposed")]
         private partial void LogDisposed();
 
-        [LoggerMessage(LogLevel.Trace, $"Disposing {nameof(ServiceManager)} instance")]
+        [LoggerMessage(1001, LogLevel.Trace, $"Disposing {nameof(ServiceManager)} instance")]
         private partial void LogDisposing();
 
-        [LoggerMessage(LogLevel.Trace, $"Successfully disposed {nameof(ServiceManager)} instance")]
+        [LoggerMessage(1002, LogLevel.Trace, $"Successfully disposed {nameof(ServiceManager)} instance")]
         private partial void LogEndDispose();
 
         #endregion
 
         #region Constructor Logging
 
-        [LoggerMessage(LogLevel.Trace, "Opening handle to SCM")]
+        [LoggerMessage(1010, LogLevel.Trace, "Opening handle to SCM")]
         private partial void LogOpenSCM();
 
-        [LoggerMessage(LogLevel.Error, "Error while opening handle to SCM")]
+        [LoggerMessage(1011, LogLevel.Error, "Error while opening handle to SCM")]
         private partial void LogErrorOpenSCM(Exception ex);
 
-        [LoggerMessage(LogLevel.Trace, "Handle to SCM successfully opened")]
+        [LoggerMessage(1012, LogLevel.Trace, "Handle to SCM successfully opened")]
         private partial void LogOpenedSCM();
 
         #endregion
 
         #region Start Logging
 
-        [LoggerMessage(LogLevel.Debug, "Starting service {serviceName}")]
+        [LoggerMessage(1020, LogLevel.Debug, "Starting service {serviceName}")]
         private partial void LogStart(string serviceName);
 
         [LoggerMessage(
+            1021,
             LogLevel.Error,
             $"Error while opening handle to service {{serviceName}} with desired access {nameof(ServiceAccessTypes.SERVICE_START)}"
         )]
         private partial void LogStartInvalidHandle(string serviceName, Exception ex);
 
-        [LoggerMessage(LogLevel.Error, "Error while starting service {serviceName}")]
+        [LoggerMessage(1022, LogLevel.Error, "Error while starting service {serviceName}")]
         private partial void LogStartError(string serviceName, Exception ex);
 
-        [LoggerMessage(LogLevel.Debug, "Service {serviceName} successfully started")]
+        [LoggerMessage(1023, LogLevel.Debug, "Service {serviceName} successfully started")]
         private partial void LogStarted(string serviceName);
 
         #endregion
 
         #region Stop Logging
 
-        [LoggerMessage(LogLevel.Debug, "Stopping service {serviceName}")]
+        [LoggerMessage(1030, LogLevel.Debug, "Stopping service {serviceName}")]
         private partial void LogStop(string serviceName);
 
         [LoggerMessage(
+            1031,
             LogLevel.Error,
             $"Error while opening handle to service {{serviceName}} with desired access {nameof(ServiceAccessTypes.SERVICE_STOP)}"
         )]
         private partial void LogStopInvalidHandle(string serviceName, Exception ex);
 
-        [LoggerMessage(LogLevel.Error, "Error while stopping service {serviceName}")]
+        [LoggerMessage(1032, LogLevel.Error, "Error while stopping service {serviceName}")]
         private partial void LogStopError(string serviceName, Exception ex);
 
-        [LoggerMessage(LogLevel.Debug, "Service {serviceName} successfully stopped")]
+        [LoggerMessage(1033, LogLevel.Debug, "Service {serviceName} successfully stopped")]
         private partial void LogStopped(string serviceName);
 
         #endregion
 
         #region SetStart Logging
 
-        [LoggerMessage(LogLevel.Debug, "Setting start mode of service {serviceName} to {startType}")]
+        [LoggerMessage(1040, LogLevel.Debug, "Setting start mode of service {serviceName} to {startType}")]
         private partial void LogSetStart(string serviceName, ServiceStartType startType);
 
         [LoggerMessage(
+            1041,
             LogLevel.Error,
             $"Error while opening handle to service {{serviceName}} with desired access {nameof(ServiceAccessTypes.SERVICE_CHANGE_CONFIG)}"
         )]
         private partial void LogSetStartInvalidHandle(string serviceName, Exception ex);
 
-        [LoggerMessage(LogLevel.Error, "Error while setting start mode of service {serviceName} to {startType}")]
+        [LoggerMessage(1042, LogLevel.Error, "Error while setting start mode of service {serviceName} to {startType}")]
         private partial void LogSetStartError(string serviceName, ServiceStartType startType, Exception ex);
 
-        [LoggerMessage(LogLevel.Debug, "Start mode of service {serviceName} successfully set to {startType}")]
+        [LoggerMessage(1043, LogLevel.Debug, "Start mode of service {serviceName} successfully set to {startType}")]
         private partial void LogSetStartCompleted(string serviceName, ServiceStartType startType);
 
         #endregion
@@ -455,6 +458,7 @@ namespace Manager.Vanguard.Common
         #region CheckPermissions Logging
 
         [LoggerMessage(
+            1050,
             LogLevel.Debug,
             "Checking whether current account can open handle to service {serviceName} with permissions "
                 + $"{nameof(ServiceAccessTypes.SERVICE_START)}, {nameof(ServiceAccessTypes.SERVICE_STOP)} "
@@ -463,6 +467,7 @@ namespace Manager.Vanguard.Common
         private partial void LogCheckPermissions(string serviceName);
 
         [LoggerMessage(
+            1051,
             LogLevel.Debug,
             "Current account can open handle to service {serviceName} with permissions"
                 + $"{nameof(ServiceAccessTypes.SERVICE_START)}, {nameof(ServiceAccessTypes.SERVICE_STOP)} "
@@ -471,6 +476,7 @@ namespace Manager.Vanguard.Common
         private partial void LogCheckedPermissionsTrue(string serviceName);
 
         [LoggerMessage(
+            1052,
             LogLevel.Debug,
             "Current account can't open handle to service {serviceName} with permissions"
                 + $"{nameof(ServiceAccessTypes.SERVICE_START)}, {nameof(ServiceAccessTypes.SERVICE_STOP)} "
@@ -482,31 +488,38 @@ namespace Manager.Vanguard.Common
 
         #region GetPermissions Logging
 
-        [LoggerMessage(LogLevel.Debug, "Getting security descriptor from service {serviceName}")]
+        [LoggerMessage(1060, LogLevel.Debug, "Getting security descriptor from service {serviceName}")]
         private partial void LogGetPermissions(string serviceName);
 
         [LoggerMessage(
+            1061,
             LogLevel.Error,
             $"Error while opening handle to service {{serviceName}} with desired access {nameof(ServiceAccessRights.READ_CONTROL)}"
         )]
         private partial void LogGetPermissionsInvalidHandle(string serviceName, Exception ex);
 
-        [LoggerMessage(LogLevel.Error, "Error while getting security descriptor from service {serviceName}")]
+        [LoggerMessage(1062, LogLevel.Error, "Error while getting security descriptor from service {serviceName}")]
         private partial void LogGetPermissionsError(string serviceName, Exception ex);
 
         [LoggerMessage(
+            1063,
             LogLevel.Error,
             "Error while converting security descriptor from service {serviceName} to string"
         )]
         private partial void LogGetPermissionsConvertError(string serviceName, Exception ex);
 
         [LoggerMessage(
+            1064,
             LogLevel.Error,
             "Error while converting string security description handle from service {serviceName} into string"
         )]
         private partial void LogGetPermissionsToStringError(string serviceName);
 
-        [LoggerMessage(LogLevel.Debug, "Successfully retrieved security descriptor from service {serviceName}: {sddl}")]
+        [LoggerMessage(
+            1065,
+            LogLevel.Debug,
+            "Successfully retrieved security descriptor from service {serviceName}: {sddl}"
+        )]
         private partial void LogGetPermissionsSuccess(string serviceName, string sddl);
 
         #endregion
@@ -514,64 +527,72 @@ namespace Manager.Vanguard.Common
         #region SetPermissions Logging
 
         [LoggerMessage(
+            1070,
             LogLevel.Debug,
             $"Setting permissions {nameof(ServiceAccessRights.SERVICE_START)}, {nameof(ServiceAccessRights.SERVICE_STOP)} "
                 + $"and {nameof(ServiceAccessRights.SERVICE_CHANGE_CONFIG)} for account {{sid}} on service {{serviceName}}"
         )]
         private partial void LogSetPermissions(string serviceName, SecurityIdentifier sid);
 
-        [LoggerMessage(LogLevel.Debug, "Current DACL for service {serviceName}: {sddl}")]
+        [LoggerMessage(1071, LogLevel.Debug, "Current DACL for service {serviceName}: {sddl}")]
         private partial void LogSetPermissionsCurrentSDDL(string serviceName, string sddl);
 
-        [LoggerMessage(LogLevel.Debug, "New DACL for service {serviceName}: {sddl}")]
+        [LoggerMessage(1072, LogLevel.Debug, "New DACL for service {serviceName}: {sddl}")]
         private partial void LogSetPermissionsNewSDDL(string serviceName, string sddl);
 
         [LoggerMessage(
+            1073,
             LogLevel.Trace,
             "Adding the required permissions for account {sid} on service {serviceName} would not modify DACL. Skipping"
         )]
         private partial void LogSetPermissionsSkip(string serviceName, SecurityIdentifier sid);
 
-        [LoggerMessage(LogLevel.Trace, "Setting new DACL for service {serviceName}")]
+        [LoggerMessage(1074, LogLevel.Trace, "Setting new DACL for service {serviceName}")]
         private partial void LogSetPermissionsPerform(string serviceName);
 
-        [LoggerMessage(LogLevel.Error, "Could not convert SDDL {sddl} into security descriptor")]
+        [LoggerMessage(1075, LogLevel.Error, "Could not convert SDDL {sddl} into security descriptor")]
         private partial void LogSetPermissionsConversionError(string sddl, Exception ex);
 
-        [LoggerMessage(LogLevel.Error, "Converted security descriptor from {sddl} did not include a DACL")]
+        [LoggerMessage(1076, LogLevel.Error, "Converted security descriptor from {sddl} did not include a DACL")]
         private partial void LogSetPermissionsDaclNotPresent(string sddl);
 
         [LoggerMessage(
+            1077,
             LogLevel.Debug,
             $"API result from {nameof(SetNamedSecurityInfo)} on service {{serviceName}}: {{result}}"
         )]
         private partial void LogSetPermissionsApiResult(string serviceName, Win32Error result);
 
-        [LoggerMessage(LogLevel.Trace, "Failed setting permissions for service {serviceName}. Fallback to sc.exe")]
+        [LoggerMessage(
+            1078,
+            LogLevel.Trace,
+            "Failed setting permissions for service {serviceName}. Fallback to sc.exe"
+        )]
         private partial void LogSetPermissionsApiResultFail(string serviceName);
 
-        [LoggerMessage(LogLevel.Debug, "Using process parameters: {startInfo}")]
+        [LoggerMessage(1079, LogLevel.Debug, "Using process parameters: {startInfo}")]
         private partial void LogSetPermissionsProcessStartInfo(ProcessStartInfo startInfo);
 
-        [LoggerMessage(LogLevel.Trace, "Starting process")]
+        [LoggerMessage(1080, LogLevel.Trace, "Starting process")]
         private partial void LogSetPermissionsStartProcess();
 
-        [LoggerMessage(LogLevel.Error, "Error while starting sc.exe for service {serviceName}")]
+        [LoggerMessage(1081, LogLevel.Error, "Error while starting sc.exe for service {serviceName}")]
         private partial void LogSetPermissionsStartProcessError(string serviceName, Exception ex);
 
-        [LoggerMessage(LogLevel.Trace, "Process started successfully")]
+        [LoggerMessage(1082, LogLevel.Trace, "Process started successfully")]
         private partial void LogSetPermissionsProcessStarted();
 
-        [LoggerMessage(LogLevel.Trace, "Waiting for process exit")]
+        [LoggerMessage(1083, LogLevel.Trace, "Waiting for process exit")]
         private partial void LogSetPermissionsProcessWait();
 
-        [LoggerMessage(LogLevel.Debug, "sc.exe exited with exit code {exitCode}")]
+        [LoggerMessage(1084, LogLevel.Debug, "sc.exe exited with exit code {exitCode}")]
         private partial void LogSetPermissionsProcessExit(int exitCode);
 
-        [LoggerMessage(LogLevel.Error, "sc.exe for service {serviceName} exited with code {exitCode}")]
+        [LoggerMessage(1085, LogLevel.Error, "sc.exe for service {serviceName} exited with code {exitCode}")]
         private partial void LogSetPermissionsProcessError(string serviceName, int exitCode);
 
         [LoggerMessage(
+            1086,
             LogLevel.Debug,
             $"Permissions {nameof(ServiceAccessRights.SERVICE_START)}, {nameof(ServiceAccessRights.SERVICE_STOP)} "
                 + $"and {nameof(ServiceAccessRights.SERVICE_CHANGE_CONFIG)} for account {{sid}} on service "
