@@ -35,7 +35,7 @@ namespace Manager.Vanguard.Common
             return logging;
         }
 
-        [LoggerMessage(LogLevel.Critical, "Application crashed while out of host")]
+        [LoggerMessage(0, LogLevel.Critical, "Application crashed while out of host")]
         public static partial void LogOutOfHostCrash(this ILogger logger, Exception ex);
     }
 }
