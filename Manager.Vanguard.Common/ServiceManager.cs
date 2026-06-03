@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
@@ -233,9 +235,60 @@ namespace Manager.Vanguard.Common
             return new(false, false, sddl);
         }
 
-        private void SetPermissionsInternal(string serviceName, string SDDL)
+        private void SetPermissionsInternal(string serviceName, string sddl)
         {
-            throw new NotImplementedException();
+            using var descriptor = ConvertStringSecurityDescriptorToSecurityDescriptor(sddl);
+            if (!GetSecurityDescriptorDacl(descriptor, out bool isDaclPresent, out var dacl, out _))
+            {
+                Exception ex =
+                    Win32Error.GetExceptionForLastError()
+                    ?? throw new ServiceManagerException("Failed to get DACL: last error must be a failure");
+                throw new ServiceManagerException(ex);
+            }
+
+            if (!isDaclPresent)
+            {
+                throw new ArgumentException("sddl was null");
+            }
+
+            Win32Error result = SetNamedSecurityInfo(
+                serviceName,
+                SE_OBJECT_TYPE.SE_SERVICE,
+                SECURITY_INFORMATION.DACL_SECURITY_INFORMATION,
+                ppDacl: dacl
+            );
+
+            if (!result.Succeeded)
+            {
+                ProcessStartInfo processStartInfo = new()
+                {
+                    UseShellExecute = true,
+                    FileName = Path.Combine(Environment.SystemDirectory, "sc.exe"),
+                    Verb = "runas",
+                    WorkingDirectory = Environment.SystemDirectory,
+                };
+                processStartInfo.ArgumentList.Add("sdset");
+                processStartInfo.ArgumentList.Add(serviceName);
+                processStartInfo.ArgumentList.Add(sddl);
+
+                using Process p = new() { StartInfo = processStartInfo };
+
+                try
+                {
+                    p.Start();
+                }
+                catch (Win32Exception ex)
+                {
+                    throw new ServiceManagerException(ex);
+                }
+
+                p.WaitForExit();
+
+                if (p.ExitCode != 0)
+                {
+                    throw new ServiceManagerException($"sc.exe failed with exit code {p.ExitCode}");
+                }
+            }
         }
 
         public void SetServicePermissions(string serviceName)
