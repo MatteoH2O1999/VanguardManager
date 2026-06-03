@@ -243,11 +243,13 @@ namespace Manager.Vanguard.Common
                 Exception ex =
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Failed to get DACL: last error must be a failure");
+                this.LogSetPermissionsConversionError(sddl, ex);
                 throw new ServiceManagerException(ex);
             }
 
             if (!isDaclPresent)
             {
+                this.LogSetPermissionsDaclNotPresent(sddl);
                 throw new ArgumentException("sddl was null");
             }
 
@@ -257,9 +259,12 @@ namespace Manager.Vanguard.Common
                 SECURITY_INFORMATION.DACL_SECURITY_INFORMATION,
                 ppDacl: dacl
             );
+            this.LogSetPermissionsApiResult(serviceName, result);
 
             if (!result.Succeeded)
             {
+                this.LogSetPermissionsApiResultFail(serviceName);
+
                 ProcessStartInfo processStartInfo = new()
                 {
                     UseShellExecute = true,
@@ -270,22 +275,29 @@ namespace Manager.Vanguard.Common
                 processStartInfo.ArgumentList.Add("sdset");
                 processStartInfo.ArgumentList.Add(serviceName);
                 processStartInfo.ArgumentList.Add(sddl);
+                this.LogSetPermissionsProcessStartInfo(processStartInfo);
 
                 using Process p = new() { StartInfo = processStartInfo };
 
+                this.LogSetPermissionsStartProcess();
                 try
                 {
                     p.Start();
                 }
                 catch (Win32Exception ex)
                 {
+                    this.LogSetPermissionsStartProcessError(serviceName, ex);
                     throw new ServiceManagerException(ex);
                 }
+                this.LogSetPermissionsProcessStarted();
 
+                this.LogSetPermissionsProcessWait();
                 p.WaitForExit();
+                this.LogSetPermissionsProcessExit(p.ExitCode);
 
                 if (p.ExitCode != 0)
                 {
+                    this.LogSetPermissionsProcessError(serviceName, p.ExitCode);
                     throw new ServiceManagerException($"sc.exe failed with exit code {p.ExitCode}");
                 }
             }
@@ -522,6 +534,42 @@ namespace Manager.Vanguard.Common
 
         [LoggerMessage(LogLevel.Trace, "Setting new DACL for service {serviceName}")]
         private partial void LogSetPermissionsPerform(string serviceName);
+
+        [LoggerMessage(LogLevel.Error, "Could not convert SDDL {sddl} into security descriptor")]
+        private partial void LogSetPermissionsConversionError(string sddl, Exception ex);
+
+        [LoggerMessage(LogLevel.Error, "Converted security descriptor from {sddl} did not include a DACL")]
+        private partial void LogSetPermissionsDaclNotPresent(string sddl);
+
+        [LoggerMessage(
+            LogLevel.Debug,
+            $"API result from {nameof(SetNamedSecurityInfo)} on service {{serviceName}}: {{result}}"
+        )]
+        private partial void LogSetPermissionsApiResult(string serviceName, Win32Error result);
+
+        [LoggerMessage(LogLevel.Trace, "Failed setting permissions for service {serviceName}. Fallback to sc.exe")]
+        private partial void LogSetPermissionsApiResultFail(string serviceName);
+
+        [LoggerMessage(LogLevel.Debug, "Using process parameters: {startInfo}")]
+        private partial void LogSetPermissionsProcessStartInfo(ProcessStartInfo startInfo);
+
+        [LoggerMessage(LogLevel.Trace, "Starting process")]
+        private partial void LogSetPermissionsStartProcess();
+
+        [LoggerMessage(LogLevel.Error, "Error while starting sc.exe for service {serviceName}")]
+        private partial void LogSetPermissionsStartProcessError(string serviceName, Exception ex);
+
+        [LoggerMessage(LogLevel.Trace, "Process started successfully")]
+        private partial void LogSetPermissionsProcessStarted();
+
+        [LoggerMessage(LogLevel.Trace, "Waiting for process exit")]
+        private partial void LogSetPermissionsProcessWait();
+
+        [LoggerMessage(LogLevel.Debug, "sc.exe exited with exit code {exitCode}")]
+        private partial void LogSetPermissionsProcessExit(int exitCode);
+
+        [LoggerMessage(LogLevel.Error, "sc.exe for service {serviceName} exited with code {exitCode}")]
+        private partial void LogSetPermissionsProcessError(string serviceName, int exitCode);
 
         [LoggerMessage(
             LogLevel.Debug,

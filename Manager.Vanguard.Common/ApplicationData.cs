@@ -36,7 +36,7 @@ namespace Manager.Vanguard.Common
         public static string AppName { get; }
 
         /// <summary>
-        /// The name of the registered service as <c>NT SERVICE/ServiceName</c>.
+        /// The name of the registered service as <c>NT SERVICE\ServiceName</c>.
         /// </summary>
         public static string ServiceName { get; }
 
