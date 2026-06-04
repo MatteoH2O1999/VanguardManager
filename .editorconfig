@@ -31,7 +31,7 @@ dotnet_search_reference_assemblies = true
 # Organizza using
 dotnet_separate_import_directive_groups = false
 dotnet_sort_system_directives_first = true
-file_header_template = Copyright (C) 2026 Matteo Dell'Acqua\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU Affero General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY, without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\nSee the\nGNU Affero General Public License for more details.\n\nYou should have received a copy of the GNU Affero General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.
+file_header_template = Copyright (C) 2026 Matteo Dell'Acqua\n\nThis file is part of Vanguard Manager.\n\nVanguard Manager is free software: you can redistribute it and/or modify\nit under the terms of the GNU Affero General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nVanguard Manager is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY, without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the\nGNU Affero General Public License for more details.\n\nYou should have received a copy of the GNU Affero General Public License\nalong with Vanguard Manager. If not, see <http://www.gnu.org/licenses/>.
 dotnet_diagnostic.IDE0073.severity = warning
 dotnet_diagnostic.IDE0005.severity = warning # Unused usings emit warnings
 
