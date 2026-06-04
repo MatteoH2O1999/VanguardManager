@@ -14,30 +14,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using Manager.Vanguard.Common;
-using Manager.Vanguard.Service;
+using Microsoft.Extensions.DependencyInjection;
 
-HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-
-builder.Logging.ClearProviders();
-builder.Logging.AddFileLogging("service");
-builder.Logging.AddEventLog(options =>
+namespace Manager.Vanguard.Common
 {
-    options.SourceName = ApplicationData.AppName;
-});
-#if DEBUG
-builder.Logging.AddConsole();
-builder.Logging.SetMinimumLevel(LogLevel.Trace);
-#else
-builder.Logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Warning);
-#endif
-
-builder.Services.AddWindowsService(options =>
-{
-    options.ServiceName = ApplicationData.ServiceName;
-});
-
-builder.Services.AddHostedService<Worker>();
-
-IHost host = builder.Build();
-host.Run();
+    public static class Registration
+    {
+        public static T AddCommons<T>(this T services)
+            where T : IServiceCollection
+        {
+            services.AddTransient<ServiceManager>();
+            services.AddTransient<ServiceAccount>();
+            return services;
+        }
+    }
+}

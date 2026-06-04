@@ -14,6 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Manager.Vanguard.Common;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
 namespace Manager.Vanguard.Launcher
 {
     internal static class Program
@@ -22,12 +27,27 @@ namespace Manager.Vanguard.Launcher
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        private static void Main()
+        private static void Main(string[] args)
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+
+            builder.Logging.ClearProviders();
+            builder.Logging.AddFileLogging("launcher");
+            builder.Logging.AddEventLog(options =>
+            {
+                options.Filter = (_, level) => level >= LogLevel.Critical;
+                options.SourceName = ApplicationData.AppName;
+            });
+#if DEBUG
+            builder.Logging.SetMinimumLevel(LogLevel.Trace);
+#endif
+
+            builder.Services.AddTransient<Runner>();
+
+            using IHost app = builder.Build();
+
+            Runner runner = app.Services.GetRequiredService<Runner>();
+            runner.Run(args);
         }
     }
 }

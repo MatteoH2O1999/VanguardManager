@@ -7,6 +7,7 @@
     <Authors>Matteo Dell'Acqua</Authors>
     <Company>H2O Productions</Company>
     <Product>Vanguard Manager</Product>
+    <ServiceName>VanguardManager</ServiceName>
     <PackageVersion>$(Version)</PackageVersion>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
@@ -19,12 +20,15 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <ImplicitUsings>true</ImplicitUsings>
     <SelfContained>true</SelfContained>
-    <PublishReadyToRun>true</PublishReadyToRun>
     <UseWindowsForms>true</UseWindowsForms>
     <DebugSymbols Condition="'$(Configuration)' == 'release'">false</DebugSymbols>
     <GenerateRuntimeConfigurationFiles Condition="'$(Configuration)' == 'release'">false</GenerateRuntimeConfigurationFiles>
     <GenerateDependencyFile Condition="'$(Configuration)' == 'release'">false</GenerateDependencyFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="ServiceName" Value="$(ServiceName)" />
+  </ItemGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
@@ -36,5 +40,6 @@
     <PackageReference Include="Microsoft.Extensions.Localization" Version="10.*" />
     <PackageReference Include="Autoupdater.NET.Official" Version="1.9.2" />
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />
+    <PackageReference Include="Vanara.PInvoke.Security" Version="5.0.5" />
   </ItemGroup>
 </Project>

@@ -26,7 +26,7 @@ namespace Manager.Vanguard.Common
             where T : ILoggingBuilder
         {
             logging.AddFile(
-                $"{ApplicationData.Local}/logs/{appName}-{{Date}}.log",
+                $"{ApplicationData.AppData}/logs/{appName}-{{Date}}.log",
                 minimumLevel: LogLevel.Information,
                 retainedFileCountLimit: 31,
                 fileSizeLimitBytes: MAX_FILE_SIZE,
@@ -35,7 +35,7 @@ namespace Manager.Vanguard.Common
             return logging;
         }
 
-        [LoggerMessage(LogLevel.Critical, "Application crashed while out of host")]
+        [LoggerMessage(0, LogLevel.Critical, "Application crashed while out of host")]
         public static partial void LogOutOfHostCrash(this ILogger logger, Exception ex);
     }
 }

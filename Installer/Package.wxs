@@ -1,4 +1,4 @@
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui" xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
   <Package Id="VanguardManager.Installer" Name="$(Product)" Manufacturer="$(Company)" Version="$(AssemblyVersion)">
     <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
 
@@ -7,26 +7,67 @@
     <Feature Id="Main">
       <ComponentGroupRef Id="AppFiles" />
 
-      <Component>
+      <Component Id="RegistryUtils">
         <RegistryValue Id="CultureKey" Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Type="integer" Name="InstallerCultureLCID" Value="[ProductLanguage]" Action="write" />
-        <RemoveRegistryKey Id="RemoveCultureKey" Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Action="removeOnUninstall" />
-        <RemoveFile Directory="INSTALLFOLDER" Name="*.*" On="uninstall" />
-        <RemoveFolder Directory="INSTALLFOLDER" On="uninstall" />
+        <RegistryValue
+          Id="Startup"
+          Root="HKLM"
+          Key="Software\Microsoft\Windows\CurrentVersion\Run"
+          Name="$(Product)"
+          Value="&quot;[INSTALLFOLDER]launcher.exe&quot; startup"
+          Type="string"
+          Action="write"
+        />
+
+        <CreateFolder Directory="APPDATAFOLDER">
+          <util:PermissionEx User="Users" GenericRead="true" GenericWrite="true" GenericExecute="true" />
+          <util:PermissionEx User="NT SERVICE\$(ServiceName)" GenericRead="true" GenericWrite="true" GenericExecute="true" />
+        </CreateFolder>
+      </Component>
+
+      <Component Id="DesktopShortcut" NeverOverwrite="true">
+        <RegistryValue Id="DesktopShortcutKey" Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Type="integer" Name="ShortcutInstalled" Value="1" Action="write" KeyPath="true" />
+        <Shortcut Id="Shortcut" Directory="DesktopFolder" Target="[INSTALLFOLDER]launcher.exe" Name="$(Product)" />
       </Component>
     </Feature>
 
     <WixVariable Id="WixUILicenseRtf" Value="./license.rtf" />
 
     <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <UIRef Id="WixUI_ErrorProgressText" />
+    <UI>
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchApplicationSet" Order="3" Condition="WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed" />
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchApplication" Order="4" Condition="WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed" />
+    </UI>
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="!(loc.LaunchApp)" />
+    <CustomAction Id="LaunchApplicationSet" Property="WixShellExecTarget" Value="[INSTALLFOLDER]launcher.exe" />
+    <CustomAction Id="LaunchApplication" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixShellExec" Impersonate="yes" />
 
     <Binary Id="EventSourceCA.dll" SourceFile="!(bindpath.InstallerEventSourceCA)\InstallerEventSourceCA.CA.dll" />
     <CustomAction Id="EventSourceCAInstall" BinaryRef="EventSourceCA.dll" DllEntry="InstallerEventSourceCA" Return="check" Execute="deferred" Impersonate="no" />
-    <CustomAction Id="EventSourceCAInstallSetData" Property="EventSourceCAInstall" Value="AppName=$(Product);Action=Install;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog)" />
+    <CustomAction
+      Id="EventSourceCAInstallSetData"
+      Property="EventSourceCAInstall"
+      Value="AppName=$(Product);Action=Install;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog);ServiceName=$(ServiceName);ServiceCleanupString=!(loc.ServiceCleanup)"
+    />
     <CustomAction Id="EventSourceCARemove" BinaryRef="EventSourceCA.dll" DllEntry="InstallerEventSourceCA" Return="check" Execute="deferred" Impersonate="no" />
-    <CustomAction Id="EventSourceCARemoveSetData" Property="EventSourceCARemove" Value="AppName=$(Product);Action=Uninstall;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog)" />
+    <CustomAction
+      Id="EventSourceCARemoveSetData"
+      Property="EventSourceCARemove"
+      Value="AppName=$(Product);Action=UninstallFinalize;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog);ServiceName=$(ServiceName);ServiceCleanupString=!(loc.ServiceCleanup)"
+    />
+    <CustomAction Id="EventSourceCARemoveInit" BinaryRef="EventSourceCA.dll" DllEntry="InstallerEventSourceCA" Return="check" Execute="deferred" Impersonate="no" />
+    <CustomAction
+      Id="EventSourceCARemoveInitSetData"
+      Property="EventSourceCARemoveInit"
+      Value="AppName=$(Product);Action=UninstallInit;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog);ServiceName=$(ServiceName);ServiceCleanupString=!(loc.ServiceCleanup)"
+    />
     <InstallExecuteSequence>
       <Custom Action="EventSourceCAInstallSetData" Before="EventSourceCAInstall" />
       <Custom Action="EventSourceCAInstall" Before="InstallFinalize" Condition="NOT Installed" />
+      <Custom Action="EventSourceCARemoveInitSetData" Before="EventSourceCARemoveInit" />
+      <Custom Action="EventSourceCARemoveInit" After="InstallInitialize" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
       <Custom Action="EventSourceCARemoveSetData" Before="EventSourceCARemove" />
       <Custom Action="EventSourceCARemove" Before="InstallFinalize" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
     </InstallExecuteSequence>

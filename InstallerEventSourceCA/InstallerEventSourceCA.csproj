@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AcceptEula>wix7</AcceptEula>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <SkipDirectoryDeps>true</SkipDirectoryDeps>
     <PlatformTarget>x86</PlatformTarget>
     <RuntimeIdentifier></RuntimeIdentifier>
@@ -14,5 +14,7 @@
   <ItemGroup>
     <PackageReference Include="WixToolset.Dtf.CustomAction" Version="7.0.0" />
     <PackageReference Include="WixToolset.Dtf.WindowsInstaller" Version="7.0.0" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.*" />
+    <PackageReference Include="Vanara.PInvoke.Security" Version="5.0.5" />
   </ItemGroup>
 </Project>
