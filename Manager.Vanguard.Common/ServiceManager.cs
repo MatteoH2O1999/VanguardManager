@@ -49,7 +49,7 @@ namespace Manager.Vanguard.Common
                         "Service manager handle is invalid: last error must be a failure."
                     );
                 this.LogErrorOpenSCM(ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException("invalid handle to SCM", ex);
             }
             this.LogOpenedSCM();
         }
@@ -65,7 +65,7 @@ namespace Manager.Vanguard.Common
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
                 this.LogStartInvalidHandle(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Invalid handle to service {serviceName}", ex);
             }
 
             if (!StartService(service))
@@ -74,7 +74,7 @@ namespace Manager.Vanguard.Common
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service was not started: last error must be a failure");
                 this.LogStartError(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Failed to start service {serviceName}", ex);
             }
 
             this.LogStarted(serviceName);
@@ -91,7 +91,7 @@ namespace Manager.Vanguard.Common
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
                 this.LogStopInvalidHandle(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Invalid handle to service {serviceName}", ex);
             }
 
             SERVICE_CONTROL_STATUS_REASON_PARAMS reason = new()
@@ -108,7 +108,7 @@ namespace Manager.Vanguard.Common
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service was not stopped: last error must be a failure");
                 this.LogStopError(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Failed to stop service {serviceName}", ex);
             }
 
             this.LogStopped(serviceName);
@@ -130,7 +130,7 @@ namespace Manager.Vanguard.Common
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
                 this.LogSetStartInvalidHandle(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Invalid handle to service {serviceName}", ex);
             }
 
             if (
@@ -148,7 +148,7 @@ namespace Manager.Vanguard.Common
                         "Service config was not changed: last error must be a failure"
                     );
                 this.LogSetStartError(serviceName, startMode, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Failed to change config for service {serviceName}", ex);
             }
 
             this.LogSetStartCompleted(serviceName, startMode);
@@ -190,7 +190,7 @@ namespace Manager.Vanguard.Common
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
                 this.LogGetPermissionsInvalidHandle(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Invalid handle to service {serviceName}", ex);
             }
 
             if (!QueryServiceObjectSecurity(service, SECURITY_INFORMATION.DACL_SECURITY_INFORMATION, out var secRes))
@@ -201,7 +201,7 @@ namespace Manager.Vanguard.Common
                         "Could not query service object security: last error must be a failure"
                     );
                 this.LogGetPermissionsError(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Failed to query security object for service {serviceName}", ex);
             }
 
             using var securityObject = secRes;
@@ -221,7 +221,7 @@ namespace Manager.Vanguard.Common
                         "Could not convert security descriptor to string handle: last error must be a failure"
                     );
                 this.LogGetPermissionsConvertError(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Failed to convert security description to string", ex);
             }
 
             using var stringSecurityObject = stringSecRes;
@@ -245,7 +245,7 @@ namespace Manager.Vanguard.Common
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Failed to get DACL: last error must be a failure");
                 this.LogSetPermissionsConversionError(sddl, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException("Failed to get DACL from security descriptor", ex);
             }
 
             if (!isDaclPresent)
@@ -288,7 +288,7 @@ namespace Manager.Vanguard.Common
                 catch (Win32Exception ex)
                 {
                     this.LogSetPermissionsStartProcessError(serviceName, ex);
-                    throw new ServiceManagerException(ex);
+                    throw new ServiceManagerException("Failed to start process for sc.exe", ex);
                 }
                 this.LogSetPermissionsProcessStarted();
 
@@ -609,7 +609,7 @@ namespace Manager.Vanguard.Common
         public ServiceManagerException(string message)
             : base(message) { }
 
-        public ServiceManagerException(Exception ex)
-            : base($"Error in {nameof(ServiceManager)}", ex) { }
+        public ServiceManagerException(string message, Exception ex)
+            : base($"Error in {nameof(ServiceManager)}: {message}", ex) { }
     }
 }
