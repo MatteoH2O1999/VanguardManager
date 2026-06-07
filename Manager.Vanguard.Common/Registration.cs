@@ -24,6 +24,7 @@ namespace Manager.Vanguard.Common
         public static T AddCommons<T>(this T services)
             where T : IServiceCollection
         {
+            services.AddTransient<RequestManager>();
             services.AddTransient<ServiceManager>();
             services.AddTransient<ServiceAccount>();
             return services;

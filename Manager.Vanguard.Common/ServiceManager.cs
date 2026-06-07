@@ -49,7 +49,7 @@ namespace Manager.Vanguard.Common
                         "Service manager handle is invalid: last error must be a failure."
                     );
                 this.LogErrorOpenSCM(ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException("invalid handle to SCM", ex);
             }
             this.LogOpenedSCM();
         }
@@ -65,7 +65,7 @@ namespace Manager.Vanguard.Common
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
                 this.LogStartInvalidHandle(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Invalid handle to service {serviceName}", ex);
             }
 
             if (!StartService(service))
@@ -74,7 +74,7 @@ namespace Manager.Vanguard.Common
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service was not started: last error must be a failure");
                 this.LogStartError(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Failed to start service {serviceName}", ex);
             }
 
             this.LogStarted(serviceName);
@@ -91,7 +91,7 @@ namespace Manager.Vanguard.Common
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
                 this.LogStopInvalidHandle(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Invalid handle to service {serviceName}", ex);
             }
 
             SERVICE_CONTROL_STATUS_REASON_PARAMS reason = new()
@@ -108,7 +108,7 @@ namespace Manager.Vanguard.Common
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service was not stopped: last error must be a failure");
                 this.LogStopError(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Failed to stop service {serviceName}", ex);
             }
 
             this.LogStopped(serviceName);
@@ -130,7 +130,7 @@ namespace Manager.Vanguard.Common
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
                 this.LogSetStartInvalidHandle(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Invalid handle to service {serviceName}", ex);
             }
 
             if (
@@ -148,7 +148,7 @@ namespace Manager.Vanguard.Common
                         "Service config was not changed: last error must be a failure"
                     );
                 this.LogSetStartError(serviceName, startMode, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Failed to change config for service {serviceName}", ex);
             }
 
             this.LogSetStartCompleted(serviceName, startMode);
@@ -190,7 +190,7 @@ namespace Manager.Vanguard.Common
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
                 this.LogGetPermissionsInvalidHandle(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Invalid handle to service {serviceName}", ex);
             }
 
             if (!QueryServiceObjectSecurity(service, SECURITY_INFORMATION.DACL_SECURITY_INFORMATION, out var secRes))
@@ -201,7 +201,7 @@ namespace Manager.Vanguard.Common
                         "Could not query service object security: last error must be a failure"
                     );
                 this.LogGetPermissionsError(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Failed to query security object for service {serviceName}", ex);
             }
 
             using var securityObject = secRes;
@@ -221,7 +221,7 @@ namespace Manager.Vanguard.Common
                         "Could not convert security descriptor to string handle: last error must be a failure"
                     );
                 this.LogGetPermissionsConvertError(serviceName, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException($"Failed to convert security description to string", ex);
             }
 
             using var stringSecurityObject = stringSecRes;
@@ -245,7 +245,7 @@ namespace Manager.Vanguard.Common
                     Win32Error.GetExceptionForLastError()
                     ?? throw new ServiceManagerException("Failed to get DACL: last error must be a failure");
                 this.LogSetPermissionsConversionError(sddl, ex);
-                throw new ServiceManagerException(ex);
+                throw new ServiceManagerException("Failed to get DACL from security descriptor", ex);
             }
 
             if (!isDaclPresent)
@@ -288,7 +288,7 @@ namespace Manager.Vanguard.Common
                 catch (Win32Exception ex)
                 {
                     this.LogSetPermissionsStartProcessError(serviceName, ex);
-                    throw new ServiceManagerException(ex);
+                    throw new ServiceManagerException("Failed to start process for sc.exe", ex);
                 }
                 this.LogSetPermissionsProcessStarted();
 
@@ -372,26 +372,26 @@ namespace Manager.Vanguard.Common
 
         #region Dispose Logging
 
-        [LoggerMessage(1000, LogLevel.Trace, $"{nameof(ServiceManager)} already disposed")]
+        [LoggerMessage(1000, LogLevel.Debug, $"{nameof(ServiceManager)} already disposed")]
         private partial void LogDisposed();
 
-        [LoggerMessage(1001, LogLevel.Trace, $"Disposing {nameof(ServiceManager)} instance")]
+        [LoggerMessage(1001, LogLevel.Debug, $"Disposing {nameof(ServiceManager)} instance")]
         private partial void LogDisposing();
 
-        [LoggerMessage(1002, LogLevel.Trace, $"Successfully disposed {nameof(ServiceManager)} instance")]
+        [LoggerMessage(1002, LogLevel.Debug, $"Successfully disposed {nameof(ServiceManager)} instance")]
         private partial void LogEndDispose();
 
         #endregion
 
         #region Constructor Logging
 
-        [LoggerMessage(1010, LogLevel.Trace, "Opening handle to SCM")]
+        [LoggerMessage(1010, LogLevel.Debug, "Opening handle to SCM")]
         private partial void LogOpenSCM();
 
         [LoggerMessage(1011, LogLevel.Error, "Error while opening handle to SCM")]
         private partial void LogErrorOpenSCM(Exception ex);
 
-        [LoggerMessage(1012, LogLevel.Trace, "Handle to SCM successfully opened")]
+        [LoggerMessage(1012, LogLevel.Debug, "Handle to SCM successfully opened")]
         private partial void LogOpenedSCM();
 
         #endregion
@@ -543,12 +543,12 @@ namespace Manager.Vanguard.Common
 
         [LoggerMessage(
             1073,
-            LogLevel.Trace,
+            LogLevel.Debug,
             "Adding the required permissions for account {sid} on service {serviceName} would not modify DACL. Skipping"
         )]
         private partial void LogSetPermissionsSkip(string serviceName, SecurityIdentifier sid);
 
-        [LoggerMessage(1074, LogLevel.Trace, "Setting new DACL for service {serviceName}")]
+        [LoggerMessage(1074, LogLevel.Debug, "Setting new DACL for service {serviceName}")]
         private partial void LogSetPermissionsPerform(string serviceName);
 
         [LoggerMessage(1075, LogLevel.Error, "Could not convert SDDL {sddl} into security descriptor")]
@@ -566,7 +566,7 @@ namespace Manager.Vanguard.Common
 
         [LoggerMessage(
             1078,
-            LogLevel.Trace,
+            LogLevel.Debug,
             "Failed setting permissions for service {serviceName}. Fallback to sc.exe"
         )]
         private partial void LogSetPermissionsApiResultFail(string serviceName);
@@ -574,16 +574,16 @@ namespace Manager.Vanguard.Common
         [LoggerMessage(1079, LogLevel.Debug, "Using process parameters: {startInfo}")]
         private partial void LogSetPermissionsProcessStartInfo(ProcessStartInfo startInfo);
 
-        [LoggerMessage(1080, LogLevel.Trace, "Starting process")]
+        [LoggerMessage(1080, LogLevel.Debug, "Starting process")]
         private partial void LogSetPermissionsStartProcess();
 
         [LoggerMessage(1081, LogLevel.Error, "Error while starting sc.exe for service {serviceName}")]
         private partial void LogSetPermissionsStartProcessError(string serviceName, Exception ex);
 
-        [LoggerMessage(1082, LogLevel.Trace, "Process started successfully")]
+        [LoggerMessage(1082, LogLevel.Debug, "Process started successfully")]
         private partial void LogSetPermissionsProcessStarted();
 
-        [LoggerMessage(1083, LogLevel.Trace, "Waiting for process exit")]
+        [LoggerMessage(1083, LogLevel.Debug, "Waiting for process exit")]
         private partial void LogSetPermissionsProcessWait();
 
         [LoggerMessage(1084, LogLevel.Debug, "sc.exe exited with exit code {exitCode}")]
@@ -609,7 +609,7 @@ namespace Manager.Vanguard.Common
         public ServiceManagerException(string message)
             : base(message) { }
 
-        public ServiceManagerException(Exception ex)
-            : base($"Error in {nameof(ServiceManager)}", ex) { }
+        public ServiceManagerException(string message, Exception ex)
+            : base($"Error in {nameof(ServiceManager)}: {message}", ex) { }
     }
 }
