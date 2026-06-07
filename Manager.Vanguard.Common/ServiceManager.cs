@@ -372,26 +372,26 @@ namespace Manager.Vanguard.Common
 
         #region Dispose Logging
 
-        [LoggerMessage(1000, LogLevel.Trace, $"{nameof(ServiceManager)} already disposed")]
+        [LoggerMessage(1000, LogLevel.Debug, $"{nameof(ServiceManager)} already disposed")]
         private partial void LogDisposed();
 
-        [LoggerMessage(1001, LogLevel.Trace, $"Disposing {nameof(ServiceManager)} instance")]
+        [LoggerMessage(1001, LogLevel.Debug, $"Disposing {nameof(ServiceManager)} instance")]
         private partial void LogDisposing();
 
-        [LoggerMessage(1002, LogLevel.Trace, $"Successfully disposed {nameof(ServiceManager)} instance")]
+        [LoggerMessage(1002, LogLevel.Debug, $"Successfully disposed {nameof(ServiceManager)} instance")]
         private partial void LogEndDispose();
 
         #endregion
 
         #region Constructor Logging
 
-        [LoggerMessage(1010, LogLevel.Trace, "Opening handle to SCM")]
+        [LoggerMessage(1010, LogLevel.Debug, "Opening handle to SCM")]
         private partial void LogOpenSCM();
 
         [LoggerMessage(1011, LogLevel.Error, "Error while opening handle to SCM")]
         private partial void LogErrorOpenSCM(Exception ex);
 
-        [LoggerMessage(1012, LogLevel.Trace, "Handle to SCM successfully opened")]
+        [LoggerMessage(1012, LogLevel.Debug, "Handle to SCM successfully opened")]
         private partial void LogOpenedSCM();
 
         #endregion
@@ -543,12 +543,12 @@ namespace Manager.Vanguard.Common
 
         [LoggerMessage(
             1073,
-            LogLevel.Trace,
+            LogLevel.Debug,
             "Adding the required permissions for account {sid} on service {serviceName} would not modify DACL. Skipping"
         )]
         private partial void LogSetPermissionsSkip(string serviceName, SecurityIdentifier sid);
 
-        [LoggerMessage(1074, LogLevel.Trace, "Setting new DACL for service {serviceName}")]
+        [LoggerMessage(1074, LogLevel.Debug, "Setting new DACL for service {serviceName}")]
         private partial void LogSetPermissionsPerform(string serviceName);
 
         [LoggerMessage(1075, LogLevel.Error, "Could not convert SDDL {sddl} into security descriptor")]
@@ -566,7 +566,7 @@ namespace Manager.Vanguard.Common
 
         [LoggerMessage(
             1078,
-            LogLevel.Trace,
+            LogLevel.Debug,
             "Failed setting permissions for service {serviceName}. Fallback to sc.exe"
         )]
         private partial void LogSetPermissionsApiResultFail(string serviceName);
@@ -574,16 +574,16 @@ namespace Manager.Vanguard.Common
         [LoggerMessage(1079, LogLevel.Debug, "Using process parameters: {startInfo}")]
         private partial void LogSetPermissionsProcessStartInfo(ProcessStartInfo startInfo);
 
-        [LoggerMessage(1080, LogLevel.Trace, "Starting process")]
+        [LoggerMessage(1080, LogLevel.Debug, "Starting process")]
         private partial void LogSetPermissionsStartProcess();
 
         [LoggerMessage(1081, LogLevel.Error, "Error while starting sc.exe for service {serviceName}")]
         private partial void LogSetPermissionsStartProcessError(string serviceName, Exception ex);
 
-        [LoggerMessage(1082, LogLevel.Trace, "Process started successfully")]
+        [LoggerMessage(1082, LogLevel.Debug, "Process started successfully")]
         private partial void LogSetPermissionsProcessStarted();
 
-        [LoggerMessage(1083, LogLevel.Trace, "Waiting for process exit")]
+        [LoggerMessage(1083, LogLevel.Debug, "Waiting for process exit")]
         private partial void LogSetPermissionsProcessWait();
 
         [LoggerMessage(1084, LogLevel.Debug, "sc.exe exited with exit code {exitCode}")]
