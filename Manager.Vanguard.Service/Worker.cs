@@ -15,16 +15,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Vanguard Manager. If not, see <http://www.gnu.org/licenses/>.
 
+using Manager.Vanguard.Common;
+
 namespace Manager.Vanguard.Service
 {
-    public sealed partial class Worker(ILogger<Worker> Logger) : BackgroundService
+    public sealed partial class Worker(
+        ILogger<Worker> Logger,
+        IHostApplicationLifetime HostApplicationLifetime,
+        ServiceManager SCM,
+        RequestManager RequestManager
+    ) : BackgroundService
     {
         private readonly ILogger logger = Logger;
+        private readonly IHostApplicationLifetime hostApplicationLifetime = HostApplicationLifetime;
+        private readonly ServiceManager serviceManager = SCM;
+        private readonly RequestManager requestManager = RequestManager;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             this.LogTodo();
-            Environment.Exit(0);
+            this.hostApplicationLifetime.StopApplication();
         }
 
         [LoggerMessage(LogLevel.Warning, "TODO: Implement service")]

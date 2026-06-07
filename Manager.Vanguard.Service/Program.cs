@@ -38,6 +38,7 @@ builder.Services.AddWindowsService(options =>
     options.ServiceName = ApplicationData.ServiceName;
 });
 
+builder.Services.AddCommons();
 builder.Services.AddHostedService<Worker>();
 
 IHost host = builder.Build();
