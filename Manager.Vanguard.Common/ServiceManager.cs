@@ -49,7 +49,7 @@ namespace Manager.Vanguard.Common
                         "Service manager handle is invalid: last error must be a failure."
                     );
                 this.LogErrorOpenSCM(ex);
-                throw new ServiceManagerException("invalid handle to SCM", ex);
+                throw new ServiceManagerException("Invalid handle to SCM", ex);
             }
             this.LogOpenedSCM();
         }
@@ -353,6 +353,30 @@ namespace Manager.Vanguard.Common
             this.LogSetPermissionsPerform(serviceName);
             this.SetPermissionsInternal(serviceName, newSddl);
             this.LogSetPermissionsSuccess(serviceName, sid);
+        }
+
+        public ServiceState CheckServiceStatus(string serviceName)
+        {
+            using var service = OpenService(this.scm, serviceName, ServiceAccessTypes.SERVICE_QUERY_STATUS);
+            if (service.IsInvalid)
+            {
+                Exception ex =
+                    Win32Error.GetExceptionForLastError()
+                    ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
+                throw new ServiceManagerException($"Invalid handle to service {serviceName}", ex);
+            }
+
+            SERVICE_STATUS_PROCESS status;
+            try
+            {
+                status = QueryServiceStatusEx<SERVICE_STATUS_PROCESS>(service);
+            }
+            catch (Win32Exception ex)
+            {
+                throw new ServiceManagerException($"Could not query status of service {serviceName}", ex);
+            }
+
+            return status.dwCurrentState;
         }
 
         public void Dispose()
