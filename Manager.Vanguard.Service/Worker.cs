@@ -33,11 +33,49 @@ namespace Manager.Vanguard.Service
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            this.LogTodo();
+            this.logger.LogDebug("Acquiring service lock");
+            IDisposable? serviceLock;
+            try
+            {
+                serviceLock = Locks.SERVICE.TryAcquire();
+            }
+            catch (LockException ex)
+            {
+                this.logger.LogError("Could not acquire service lock", ex);
+                this.hostApplicationLifetime.StopApplication();
+                return;
+            }
+
+            if (serviceLock is null)
+            {
+                this.logger.LogError("Service lock already in use by another process");
+            }
+            else
+            {
+                this.logger.LogInformation("Service lock acquired");
+                using (serviceLock)
+                {
+                    if (this.requestManager.RequestExists())
+                    {
+                        await this.HandleRequest(stoppingToken);
+                    }
+                    else
+                    {
+                        await this.HandleNoRequest(stoppingToken);
+                    }
+                }
+            }
             this.hostApplicationLifetime.StopApplication();
         }
 
-        [LoggerMessage(LogLevel.Warning, "TODO: Implement service")]
-        private partial void LogTodo();
+        private async Task HandleNoRequest(CancellationToken stoppingToken)
+        {
+            this.logger.LogInformation("No request detected");
+        }
+
+        private async Task HandleRequest(CancellationToken stoppingToken)
+        {
+            this.logger.LogInformation("Request detected");
+        }
     }
 }
