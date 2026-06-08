@@ -32,21 +32,16 @@ namespace InstallerEventSourceCA
             try
             {
                 session.Log("Begin InstallerEventSourceCA");
-
                 string action = session.CustomActionData["Action"];
-                string appName = session.CustomActionData["AppName"];
-                string company = session.CustomActionData["CompanyName"];
-                string dialogString = session.CustomActionData["DialogString"];
-                string serviceName = session.CustomActionData["ServiceName"];
-                string serviceCleanupString = session.CustomActionData["ServiceCleanupString"];
-                string serviceCleanupTemplate = serviceCleanupString.Replace("...", ": [1]");
-                string kernelLevelServiceName = session.CustomActionData["KernelDriverServiceName"];
-                string userLevelServiceName = session.CustomActionData["UserLevelService"];
-
                 switch (action)
                 {
                     case "Install":
                     {
+                        string appName = session.CustomActionData["AppName"];
+                        string serviceName = session.CustomActionData["ServiceName"];
+                        string kernelLevelServiceName = session.CustomActionData["KernelDriverServiceName"];
+                        string userLevelServiceName = session.CustomActionData["UserLevelService"];
+
                         session.Log("Performing 'Install' action");
 
                         string[] services =
@@ -144,6 +139,12 @@ namespace InstallerEventSourceCA
                     }
                     case "UninstallInit":
                     {
+                        session.Log("Performing 'UninstallInit' action");
+
+                        string serviceName = session.CustomActionData["ServiceName"];
+                        string serviceCleanupString = session.CustomActionData["ServiceCleanupString"];
+                        string serviceCleanupTemplate = serviceCleanupString.Replace("...", ": [1]");
+
                         using (Record rec = new(3))
                         {
                             rec[1] = "Clean service permissions";
@@ -236,6 +237,10 @@ namespace InstallerEventSourceCA
                     case "UninstallFinalize":
                     {
                         session.Log("Performing 'UninstallFinalize' action");
+
+                        string appName = session.CustomActionData["AppName"];
+                        string company = session.CustomActionData["CompanyName"];
+                        string dialogString = session.CustomActionData["DialogString"];
 
                         string manufacturerPath = Path.Combine(
                             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),

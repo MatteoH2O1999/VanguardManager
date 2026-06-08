@@ -49,20 +49,16 @@
     <CustomAction
       Id="EventSourceCAInstallSetData"
       Property="EventSourceCAInstall"
-      Value="AppName=$(Product);Action=Install;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog);ServiceName=$(ServiceName);ServiceCleanupString=!(loc.ServiceCleanup);KernelDriverServiceName=$(KernelDriverServiceName);UserLevelService=$(UserLevelService)"
+      Value="Action=Install;AppName=$(Product);ServiceName=$(ServiceName);KernelDriverServiceName=$(KernelDriverServiceName);UserLevelService=$(UserLevelService)"
     />
     <CustomAction Id="EventSourceCARemove" BinaryRef="EventSourceCA.dll" DllEntry="InstallerEventSourceCA" Return="check" Execute="deferred" Impersonate="no" />
     <CustomAction
       Id="EventSourceCARemoveSetData"
       Property="EventSourceCARemove"
-      Value="AppName=$(Product);Action=UninstallFinalize;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog);ServiceName=$(ServiceName);ServiceCleanupString=!(loc.ServiceCleanup);KernelDriverServiceName=$(KernelDriverServiceName);UserLevelService=$(UserLevelService)"
+      Value="Action=UninstallFinalize;AppName=$(Product);CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog)"
     />
     <CustomAction Id="EventSourceCARemoveInit" BinaryRef="EventSourceCA.dll" DllEntry="InstallerEventSourceCA" Return="check" Execute="deferred" Impersonate="no" />
-    <CustomAction
-      Id="EventSourceCARemoveInitSetData"
-      Property="EventSourceCARemoveInit"
-      Value="AppName=$(Product);Action=UninstallInit;CompanyName=$(Company);DialogString=!(loc.RemoveLocalFilesDialog);ServiceName=$(ServiceName);ServiceCleanupString=!(loc.ServiceCleanup);KernelDriverServiceName=$(KernelDriverServiceName);UserLevelService=$(UserLevelService)"
-    />
+    <CustomAction Id="EventSourceCARemoveInitSetData" Property="EventSourceCARemoveInit" Value="Action=UninstallInit;ServiceName=$(ServiceName);ServiceCleanupString=!(loc.ServiceCleanup)" />
     <InstallExecuteSequence>
       <Custom Action="EventSourceCAInstallSetData" Before="EventSourceCAInstall" />
       <Custom Action="EventSourceCAInstall" Before="InstallFinalize" Condition="NOT Installed" />

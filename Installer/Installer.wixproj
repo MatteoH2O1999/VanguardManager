@@ -4,14 +4,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DefineConstants>
-        AssemblyVersion=$(AssemblyVersion);
-        Product=$(Product);
-        Company=$(Company);
-        ServiceName=$(ServiceName);
-        KernelDriverServiceName=$(KernelDriverServiceName);
-        UserLevelService=$(UserLevelService)
-    </DefineConstants>
+    <DefineConstants>AssemblyVersion=$(AssemblyVersion);Product=$(Product);Company=$(Company);ServiceName=$(ServiceName);KernelDriverServiceName=$(KernelDriverServiceName);UserLevelService=$(UserLevelService)</DefineConstants>
     <Cultures>it-IT;en-US;es-ES;fr-FR;de-DE</Cultures>
     <OutDir>$(MSBuildThisFileDirectory)/../msi</OutDir>
     <SuppressPdbOutput>true</SuppressPdbOutput>
