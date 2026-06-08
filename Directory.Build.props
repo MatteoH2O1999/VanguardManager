@@ -21,6 +21,7 @@
     <RepositoryType>git</RepositoryType>
     <Copyright>Copyright © Matteo Dell'Acqua 2026-$([System.DateTime]::Now.ToString("yyyy"))</Copyright>
     <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
     <TargetFramework>net$(NetVersion).0-windows</TargetFramework>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <ImplicitUsings>true</ImplicitUsings>
