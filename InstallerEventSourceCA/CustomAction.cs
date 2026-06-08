@@ -40,6 +40,8 @@ namespace InstallerEventSourceCA
                 string serviceName = session.CustomActionData["ServiceName"];
                 string serviceCleanupString = session.CustomActionData["ServiceCleanupString"];
                 string serviceCleanupTemplate = serviceCleanupString.Replace("...", ": [1]");
+                string kernelLevelServiceName = session.CustomActionData["KernelDriverServiceName"];
+                string userLevelServiceName = session.CustomActionData["UserLevelService"];
 
                 switch (action)
                 {
@@ -53,7 +55,7 @@ namespace InstallerEventSourceCA
                             .. ServiceController.GetDevices().Select(s => s.ServiceName),
                         ];
 
-                        if (services.Contains("vgk") && services.Contains("vgc"))
+                        if (services.Contains(kernelLevelServiceName) && services.Contains(userLevelServiceName))
                         {
                             session.Log("Assigning permissions to service account");
 
@@ -80,11 +82,15 @@ namespace InstallerEventSourceCA
                                 return ActionResult.Failure;
                             }
 
-                            CommonSecurityDescriptor vgkSec = GetServiceSecurityDescriptor("vgk", scm);
-                            DiscretionaryAcl vgkDacl =
-                                vgkSec.DiscretionaryAcl ?? throw new Exception("DACL cannot be null");
-                            vgkDacl.Purge(sid);
-                            vgkDacl.AddAccess(
+                            CommonSecurityDescriptor kernelLevelServiceSecurity = GetServiceSecurityDescriptor(
+                                kernelLevelServiceName,
+                                scm
+                            );
+                            DiscretionaryAcl kernelLevelServiceDACL =
+                                kernelLevelServiceSecurity.DiscretionaryAcl
+                                ?? throw new Exception("DACL cannot be null");
+                            kernelLevelServiceDACL.Purge(sid);
+                            kernelLevelServiceDACL.AddAccess(
                                 AccessControlType.Allow,
                                 sid,
                                 (int)(
@@ -96,11 +102,14 @@ namespace InstallerEventSourceCA
                                 PropagationFlags.None
                             );
 
-                            CommonSecurityDescriptor vgcSec = GetServiceSecurityDescriptor("vgc", scm);
-                            DiscretionaryAcl vgcDacl =
-                                vgcSec.DiscretionaryAcl ?? throw new Exception("DACL cannot be null");
-                            vgcDacl.Purge(sid);
-                            vgcDacl.AddAccess(
+                            CommonSecurityDescriptor userLevelServiceSecurity = GetServiceSecurityDescriptor(
+                                userLevelServiceName,
+                                scm
+                            );
+                            DiscretionaryAcl userLevelServiceDACL =
+                                userLevelServiceSecurity.DiscretionaryAcl ?? throw new Exception("DACL cannot be null");
+                            userLevelServiceDACL.Purge(sid);
+                            userLevelServiceDACL.AddAccess(
                                 AccessControlType.Allow,
                                 sid,
                                 (int)(
@@ -112,8 +121,8 @@ namespace InstallerEventSourceCA
                                 PropagationFlags.None
                             );
 
-                            SetServiceSecurityDescriptor("vgk", scm, vgkSec);
-                            SetServiceSecurityDescriptor("vgc", scm, vgcSec);
+                            SetServiceSecurityDescriptor(kernelLevelServiceName, scm, kernelLevelServiceSecurity);
+                            SetServiceSecurityDescriptor(userLevelServiceName, scm, userLevelServiceSecurity);
                         }
                         else
                         {

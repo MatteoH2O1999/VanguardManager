@@ -25,6 +25,8 @@ namespace Manager.Vanguard.Common
     public static class ApplicationData
     {
         private const string SERVICE_NAME_METADATA_KEY = "ServiceName";
+        private const string KERNEL_LEVEL_SERVICE_NAME_METADATA_KEY = "KernelDriverServiceName";
+        private const string USER_LEVEL_SERVICE_NAME_METADATA_KEY = "UserLevelService";
 
         /// <summary>
         /// The path to the shared application data folder.
@@ -41,6 +43,16 @@ namespace Manager.Vanguard.Common
         /// </summary>
         public static string ServiceName { get; }
 
+        /// <summary>
+        /// The name of Vanguard's kernel level service.
+        /// </summary>
+        public static string KernelLevelServiceName { get; }
+
+        /// <summary>
+        /// The name of Vanguard's user level service.
+        /// </summary>
+        public static string UserLevelServiceName { get; }
+
         static ApplicationData()
         {
             ArgumentNullException.ThrowIfNull(Application.CompanyName);
@@ -53,31 +65,27 @@ namespace Manager.Vanguard.Common
                 Application.ProductName
             );
 
-            IEnumerable<AssemblyMetadataAttribute> metadata = Assembly
-                .GetExecutingAssembly()
-                .GetCustomAttributes<AssemblyMetadataAttribute>();
+            ServiceName = GetMetadata(SERVICE_NAME_METADATA_KEY);
+            KernelLevelServiceName = GetMetadata(KERNEL_LEVEL_SERVICE_NAME_METADATA_KEY);
+            UserLevelServiceName = GetMetadata(USER_LEVEL_SERVICE_NAME_METADATA_KEY);
+        }
 
+        private static string GetMetadata(string key)
+        {
             AssemblyMetadataAttribute[] serviceAttributes =
             [
-                .. metadata.Where(m => m.Key == SERVICE_NAME_METADATA_KEY),
+                .. Assembly
+                    .GetExecutingAssembly()
+                    .GetCustomAttributes<AssemblyMetadataAttribute>()
+                    .Where(m => m.Key == key),
             ];
-            if (serviceAttributes.Length == 0)
-            {
-                throw new InvalidAssemblyMetadataException($"Metadata key {SERVICE_NAME_METADATA_KEY} not found");
-            }
-            if (serviceAttributes.Length > 1)
-            {
-                throw new InvalidAssemblyMetadataException(
-                    $"Duplicate metadata found for key {SERVICE_NAME_METADATA_KEY}"
-                );
-            }
-            string serviceName =
-                serviceAttributes[0].Value
-                ?? throw new InvalidAssemblyMetadataException(
-                    $"Metadata value for {SERVICE_NAME_METADATA_KEY} is null"
-                );
 
-            ServiceName = serviceName;
+            return serviceAttributes.Length == 0
+                    ? throw new InvalidAssemblyMetadataException($"Metadata key {key} not found")
+                : serviceAttributes.Length > 1
+                    ? throw new InvalidAssemblyMetadataException($"Duplicate metadata found for key {key}")
+                : serviceAttributes[0].Value
+                    ?? throw new InvalidAssemblyMetadataException($"Metadata value for {key} is null");
         }
     }
 
