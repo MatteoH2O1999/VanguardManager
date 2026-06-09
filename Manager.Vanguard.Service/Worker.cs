@@ -52,6 +52,7 @@ namespace Manager.Vanguard.Service
             catch (LockException ex)
             {
                 this.logger.LogError(ex, "Could not acquire service lock");
+                Environment.ExitCode = -1;
                 this.hostApplicationLifetime.StopApplication();
                 return;
             }
