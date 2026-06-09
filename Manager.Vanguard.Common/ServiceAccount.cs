@@ -40,5 +40,5 @@ namespace Manager.Vanguard.Common
     }
 
     public sealed class ServiceAccountNotFoundException(IdentityNotMappedException ex)
-        : Exception($"Could not find service account 'NT SERVICE/{ApplicationData.ServiceName}'", ex);
+        : Exception($"Could not find service account 'NT SERVICE\\{ApplicationData.ServiceName}'", ex);
 }
