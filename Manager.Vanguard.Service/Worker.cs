@@ -15,17 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Vanguard Manager. If not, see <http://www.gnu.org/licenses/>.
 
-using System.ComponentModel;
 using Manager.Vanguard.Common;
 using static Vanara.PInvoke.AdvApi32;
 
 namespace Manager.Vanguard.Service
 {
-    public sealed partial class Worker(
+    internal sealed partial class Worker(
         ILogger<Worker> Logger,
         IHostApplicationLifetime HostApplicationLifetime,
-        ServiceManager SCM,
-        RequestManager RequestManager
+        RequestManager RequestManager,
+        VanguardManager VManager,
+        GameManager GManager
     ) : BackgroundService
     {
         private const int SHUTDOWN_CHECK_INTERVAL_SECONDS =
@@ -38,44 +38,54 @@ namespace Manager.Vanguard.Service
 
         private readonly ILogger logger = Logger;
         private readonly IHostApplicationLifetime hostApplicationLifetime = HostApplicationLifetime;
-        private readonly ServiceManager serviceManager = SCM;
+        private readonly VanguardManager vanguardManager = VManager;
+        private readonly GameManager gameManager = GManager;
         private readonly RequestManager requestManager = RequestManager;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            this.logger.LogDebug("Acquiring service lock");
-            IDisposable? serviceLock;
             try
             {
-                serviceLock = Locks.SERVICE.TryAcquire();
-            }
-            catch (LockException ex)
-            {
-                this.logger.LogError(ex, "Could not acquire service lock");
-                Environment.ExitCode = -1;
-                this.hostApplicationLifetime.StopApplication();
-                return;
-            }
-
-            if (serviceLock is null)
-            {
-                this.logger.LogError("Service lock already in use by another process");
-                Environment.ExitCode = -1;
-            }
-            else
-            {
-                this.logger.LogInformation("Service lock acquired");
-                using (serviceLock)
+                this.logger.LogDebug("Acquiring service lock");
+                IDisposable? serviceLock;
+                try
                 {
-                    if (this.requestManager.RequestExists())
+                    serviceLock = Locks.SERVICE.TryAcquire();
+                }
+                catch (LockException ex)
+                {
+                    this.logger.LogError(ex, "Could not acquire service lock");
+                    Environment.ExitCode = -1;
+                    this.hostApplicationLifetime.StopApplication();
+                    return;
+                }
+
+                if (serviceLock is null)
+                {
+                    this.logger.LogError("Service lock already in use by another process");
+                    Environment.ExitCode = -1;
+                }
+                else
+                {
+                    this.logger.LogInformation("Service lock acquired");
+                    using (serviceLock)
                     {
-                        await this.HandleRequest(stoppingToken);
-                    }
-                    else
-                    {
-                        await this.HandleNoRequest(stoppingToken);
+                        if (this.requestManager.RequestExists())
+                        {
+                            await this.HandleRequest(stoppingToken);
+                        }
+                        else
+                        {
+                            await this.HandleNoRequest(stoppingToken);
+                        }
                     }
                 }
+                this.logger.LogInformation("Stopping service");
+            }
+            catch (OperationCanceledException)
+            {
+                this.logger.LogWarning("The operation was cancelled");
+                Environment.ExitCode = 1;
             }
             this.hostApplicationLifetime.StopApplication();
         }
@@ -89,9 +99,9 @@ namespace Manager.Vanguard.Service
             ServiceState kernelDriverState;
             try
             {
-                kernelDriverState = this.serviceManager.CheckStatus(ApplicationData.KernelLevelServiceName);
+                kernelDriverState = this.vanguardManager.KernelDriverState;
             }
-            catch (Win32Exception ex)
+            catch (ServiceManagerException ex)
             {
                 this.logger.LogError(ex, "Could not probe for kernel driver status");
                 Environment.ExitCode = -1;
@@ -106,9 +116,9 @@ namespace Manager.Vanguard.Service
             ServiceState userServiceState;
             try
             {
-                userServiceState = this.serviceManager.CheckStatus(ApplicationData.UserLevelServiceName);
+                userServiceState = this.vanguardManager.UserLevelServiceState;
             }
-            catch (Win32Exception ex)
+            catch (ServiceManagerException ex)
             {
                 this.logger.LogError(ex, "Could not probe for user service status");
                 Environment.ExitCode = -1;
@@ -124,90 +134,125 @@ namespace Manager.Vanguard.Service
             {
                 try
                 {
-                    await this.ShutdownVanguard(stoppingToken);
+                    this.vanguardManager.DeactivateVanguard();
+                    await this.vanguardManager.ShutdownVanguard(stoppingToken);
                 }
-                catch (Win32Exception ex)
+                catch (ServiceManagerException ex)
                 {
                     this.logger.LogError(ex, "Could not shut down Vanguard");
                     Environment.ExitCode = -1;
                 }
+            }
+            else
+            {
+                this.logger.LogInformation("Vanguard is already stopped");
             }
         }
 
         private async Task HandleRequest(CancellationToken stoppingToken)
         {
             this.logger.LogInformation("Request detected");
-        }
 
-        private async Task ShutdownVanguard(CancellationToken stoppingToken)
-        {
-            this.logger.LogInformation("Shutting down Vanguard");
-
-            this.serviceManager.SetStart(ApplicationData.KernelLevelServiceName, ServiceStartType.SERVICE_DISABLED);
-            this.logger.LogInformation(
-                $"Kernel level driver {{}} start mode set to {nameof(ServiceStartType.SERVICE_DISABLED)}",
-                ApplicationData.KernelLevelServiceName
-            );
-
-            this.serviceManager.SetStart(ApplicationData.UserLevelServiceName, ServiceStartType.SERVICE_DISABLED);
-            this.logger.LogInformation(
-                $"User level service {{}} start mode set to {nameof(ServiceStartType.SERVICE_DISABLED)}",
-                ApplicationData.UserLevelServiceName
-            );
-
-            if (this.serviceManager.CheckStatus(ApplicationData.KernelLevelServiceName) != ServiceState.SERVICE_STOPPED)
+            ServiceState kernelDriverState;
+            try
             {
-                this.serviceManager.Stop(ApplicationData.KernelLevelServiceName);
-                this.logger.LogInformation(
-                    "Requested immediate shutdown of kernel level driver {}",
-                    ApplicationData.KernelLevelServiceName
-                );
+                kernelDriverState = this.vanguardManager.KernelDriverState;
+            }
+            catch (ServiceManagerException ex)
+            {
+                this.logger.LogError(ex, "Could not probe for kernel driver status");
+                Environment.ExitCode = -1;
+                return;
             }
 
-            if (this.serviceManager.CheckStatus(ApplicationData.UserLevelServiceName) != ServiceState.SERVICE_STOPPED)
+            if (kernelDriverState == ServiceState.SERVICE_RUNNING)
             {
-                this.serviceManager.Stop(ApplicationData.UserLevelServiceName);
-                this.logger.LogInformation(
-                    "Requested immediate shutdown of user level service {}",
-                    ApplicationData.UserLevelServiceName
-                );
+                this.logger.LogInformation("Vanguard is running");
+                this.logger.LogInformation("Waiting for play session start");
+
+                try
+                {
+                    await this.gameManager.WaitForPlaySessionStart(stoppingToken);
+                }
+                catch (ServiceManagerException ex)
+                {
+                    this.logger.LogError(ex, "Could not wait for play session start");
+                    Environment.ExitCode = -1;
+                    return;
+                }
+
+                this.logger.LogInformation("Play session started");
+                this.logger.LogInformation("Request complete. Deleting request");
+
+                try
+                {
+                    this.requestManager.DeleteRequest();
+                }
+                catch (RequestManagerException ex)
+                {
+                    this.logger.LogError(ex, "Could not delete request");
+                    Environment.ExitCode = -1;
+                    return;
+                }
+
+                this.logger.LogInformation("Request deleted");
+                this.logger.LogInformation("Deactivating Vanguard");
+
+                try
+                {
+                    this.vanguardManager.DeactivateVanguard();
+                }
+                catch (ServiceManagerException ex)
+                {
+                    this.logger.LogError(ex, "Could not deactivate Vanguard");
+                    Environment.ExitCode = -1;
+                    return;
+                }
+
+                this.logger.LogInformation("Vanguard deactivated");
+                this.logger.LogInformation("Waiting for play session end");
+
+                try
+                {
+                    await this.gameManager.WaitForPlaySessionEnd(stoppingToken);
+                }
+                catch (ServiceManagerException ex)
+                {
+                    this.logger.LogError(ex, "Could not wait for play session end");
+                    Environment.ExitCode = -1;
+                    return;
+                }
+
+                this.logger.LogInformation("Play session ended");
+                this.logger.LogInformation("Shutting down Vanguard");
+
+                try
+                {
+                    await this.vanguardManager.ShutdownVanguard(stoppingToken);
+                }
+                catch (ServiceManagerException ex)
+                {
+                    this.logger.LogError(ex, "Could not shut down Vanguard");
+                    Environment.ExitCode = -1;
+                    return;
+                }
+
+                this.logger.LogInformation("Vanguard is shut down");
             }
-
-            await this.WaitForVanguardShutdown(stoppingToken);
-
-            this.logger.LogInformation("Vanguard successfully shut down");
-        }
-
-        private async Task WaitForVanguardShutdown(CancellationToken stoppingToken)
-        {
-            ServiceState kernelDriverState = this.serviceManager.CheckStatus(ApplicationData.KernelLevelServiceName);
-            ServiceState userServiceState = this.serviceManager.CheckStatus(ApplicationData.UserLevelServiceName);
-
-            this.logger.LogInformation(
-                "Kernel level driver {} state: {}; User level service {} state: {}",
-                ApplicationData.KernelLevelServiceName,
-                kernelDriverState,
-                ApplicationData.UserLevelServiceName,
-                userServiceState
-            );
-
-            while (
-                kernelDriverState != ServiceState.SERVICE_STOPPED || userServiceState != ServiceState.SERVICE_STOPPED
-            )
+            else
             {
-                this.logger.LogInformation($"Waiting {SHUTDOWN_CHECK_INTERVAL_SECONDS} seconds");
-                await Task.Delay(SHUTDOWN_CHECK_INTERVAL, stoppingToken);
-
-                kernelDriverState = this.serviceManager.CheckStatus(ApplicationData.KernelLevelServiceName);
-                userServiceState = this.serviceManager.CheckStatus(ApplicationData.UserLevelServiceName);
-
-                this.logger.LogInformation(
-                    "Kernel level driver {} state: {}; User level service {} state: {}",
-                    ApplicationData.KernelLevelServiceName,
-                    kernelDriverState,
-                    ApplicationData.UserLevelServiceName,
-                    userServiceState
-                );
+                this.logger.LogInformation("Vanguard is not running");
+                try
+                {
+                    this.vanguardManager.ActivateVanguard();
+                }
+                catch (ServiceManagerException ex)
+                {
+                    this.logger.LogError(ex, "Could not activate Vanguard");
+                    Environment.ExitCode = -1;
+                    return;
+                }
+                this.logger.LogInformation("Waiting for reboot");
             }
         }
     }
