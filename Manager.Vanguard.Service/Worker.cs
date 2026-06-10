@@ -46,7 +46,7 @@ namespace Manager.Vanguard.Service
         {
             try
             {
-                this.logger.LogDebug("Acquiring service lock");
+                this.LogAcquiringServiceLock();
                 IDisposable? serviceLock;
                 try
                 {
@@ -54,7 +54,7 @@ namespace Manager.Vanguard.Service
                 }
                 catch (LockException ex)
                 {
-                    this.logger.LogError(ex, "Could not acquire service lock");
+                    this.LogServiceLockError(ex);
                     Environment.ExitCode = -1;
                     this.hostApplicationLifetime.StopApplication();
                     return;
@@ -62,12 +62,12 @@ namespace Manager.Vanguard.Service
 
                 if (serviceLock is null)
                 {
-                    this.logger.LogError("Service lock already in use by another process");
+                    this.LogServiceLockAlreadyInUse();
                     Environment.ExitCode = -1;
                 }
                 else
                 {
-                    this.logger.LogInformation("Service lock acquired");
+                    this.LogServiceLockAcquired();
                     using (serviceLock)
                     {
                         if (this.requestManager.RequestExists())
@@ -80,11 +80,11 @@ namespace Manager.Vanguard.Service
                         }
                     }
                 }
-                this.logger.LogInformation("Stopping service");
+                this.LogStoppingService();
             }
             catch (OperationCanceledException)
             {
-                this.logger.LogWarning("The operation was cancelled");
+                this.LogCancelled();
                 Environment.ExitCode = 1;
             }
             this.hostApplicationLifetime.StopApplication();
@@ -92,7 +92,7 @@ namespace Manager.Vanguard.Service
 
         private async Task HandleNoRequest(CancellationToken stoppingToken)
         {
-            this.logger.LogInformation("No play session request detected");
+            this.LogNoRequest();
 
             bool shouldShutdown = false;
 
@@ -103,13 +103,13 @@ namespace Manager.Vanguard.Service
             }
             catch (ServiceManagerException ex)
             {
-                this.logger.LogError(ex, "Could not probe for kernel driver status");
+                this.LogProbeKernelDriverError(ex);
                 Environment.ExitCode = -1;
                 return;
             }
             if (kernelDriverState != ServiceState.SERVICE_STOPPED)
             {
-                this.logger.LogWarning("Kernel driver is active but no play session was requested");
+                this.LogKernelDriverActiveWithoutRequest();
                 shouldShutdown = true;
             }
 
@@ -120,13 +120,13 @@ namespace Manager.Vanguard.Service
             }
             catch (ServiceManagerException ex)
             {
-                this.logger.LogError(ex, "Could not probe for user service status");
+                this.LogProbeUserServiceError(ex);
                 Environment.ExitCode = -1;
                 return;
             }
             if (userServiceState != ServiceState.SERVICE_STOPPED)
             {
-                this.logger.LogWarning("User service is active but no play session was requested");
+                this.LogUserServiceActiveWithoutRequest();
                 shouldShutdown = true;
             }
 
@@ -139,19 +139,19 @@ namespace Manager.Vanguard.Service
                 }
                 catch (ServiceManagerException ex)
                 {
-                    this.logger.LogError(ex, "Could not shut down Vanguard");
+                    this.LogVanguardShutdownError(ex);
                     Environment.ExitCode = -1;
                 }
             }
             else
             {
-                this.logger.LogInformation("Vanguard is already stopped");
+                this.LogVanguardAlreadyStopped();
             }
         }
 
         private async Task HandleRequest(CancellationToken stoppingToken)
         {
-            this.logger.LogInformation("Request detected");
+            this.LogRequest();
 
             ServiceState kernelDriverState;
             try
@@ -160,29 +160,29 @@ namespace Manager.Vanguard.Service
             }
             catch (ServiceManagerException ex)
             {
-                this.logger.LogError(ex, "Could not probe for kernel driver status");
+                this.LogProbeKernelDriverError(ex);
                 Environment.ExitCode = -1;
                 return;
             }
 
             if (kernelDriverState == ServiceState.SERVICE_RUNNING)
             {
-                this.logger.LogInformation("Vanguard is running");
-                this.logger.LogInformation("Waiting for play session start");
+                this.LogVanguardRunning();
+                this.LogWaitForPlaySessionStart();
 
                 try
                 {
                     await this.gameManager.WaitForPlaySessionStart(stoppingToken);
                 }
-                catch (ServiceManagerException ex)
+                catch (Exception ex)
                 {
-                    this.logger.LogError(ex, "Could not wait for play session start");
+                    this.LogWaitForPlaySessionStartError(ex);
                     Environment.ExitCode = -1;
                     return;
                 }
 
-                this.logger.LogInformation("Play session started");
-                this.logger.LogInformation("Request complete. Deleting request");
+                this.LogPlaySessionStart();
+                this.LogDeleteRequest();
 
                 try
                 {
@@ -190,13 +190,13 @@ namespace Manager.Vanguard.Service
                 }
                 catch (RequestManagerException ex)
                 {
-                    this.logger.LogError(ex, "Could not delete request");
+                    this.LogDeleteRequestError(ex);
                     Environment.ExitCode = -1;
                     return;
                 }
 
-                this.logger.LogInformation("Request deleted");
-                this.logger.LogInformation("Deactivating Vanguard");
+                this.LogRequestDeleted();
+                this.LogDeactivatingVanguard();
 
                 try
                 {
@@ -204,13 +204,13 @@ namespace Manager.Vanguard.Service
                 }
                 catch (ServiceManagerException ex)
                 {
-                    this.logger.LogError(ex, "Could not deactivate Vanguard");
+                    this.LogDeactivatingVanguardError(ex);
                     Environment.ExitCode = -1;
                     return;
                 }
 
-                this.logger.LogInformation("Vanguard deactivated");
-                this.logger.LogInformation("Waiting for play session end");
+                this.LogDeactivatedVanguard();
+                this.LogWaitForPlaySessionEnd();
 
                 try
                 {
@@ -218,13 +218,13 @@ namespace Manager.Vanguard.Service
                 }
                 catch (ServiceManagerException ex)
                 {
-                    this.logger.LogError(ex, "Could not wait for play session end");
+                    this.LogWaitForPlaySessionEndError(ex);
                     Environment.ExitCode = -1;
                     return;
                 }
 
-                this.logger.LogInformation("Play session ended");
-                this.logger.LogInformation("Shutting down Vanguard");
+                this.LogPlaySessionEnd();
+                this.LogShuttingDownVanguard();
 
                 try
                 {
@@ -232,28 +232,139 @@ namespace Manager.Vanguard.Service
                 }
                 catch (ServiceManagerException ex)
                 {
-                    this.logger.LogError(ex, "Could not shut down Vanguard");
+                    this.LogShuttingDownVanguardError(ex);
                     Environment.ExitCode = -1;
                     return;
                 }
 
-                this.logger.LogInformation("Vanguard is shut down");
+                this.LogVanguardShutdown();
             }
             else
             {
-                this.logger.LogInformation("Vanguard is not running");
+                this.LogVanguardNotRunning();
                 try
                 {
                     this.vanguardManager.ActivateVanguard();
                 }
                 catch (ServiceManagerException ex)
                 {
-                    this.logger.LogError(ex, "Could not activate Vanguard");
+                    this.LogVanguardActivationError(ex);
                     Environment.ExitCode = -1;
                     return;
                 }
-                this.logger.LogInformation("Waiting for reboot");
+                this.LogWaitForReboot();
             }
         }
+
+        #region ExecuteAsync Logging
+
+        [LoggerMessage(LogLevel.Debug, "Acquiring service lock")]
+        private partial void LogAcquiringServiceLock();
+
+        [LoggerMessage(LogLevel.Error, "Could not acquire service lock")]
+        private partial void LogServiceLockError(LockException ex);
+
+        [LoggerMessage(LogLevel.Error, "Service lock already in use by another process")]
+        private partial void LogServiceLockAlreadyInUse();
+
+        [LoggerMessage(LogLevel.Information, "Service lock acquired")]
+        private partial void LogServiceLockAcquired();
+
+        [LoggerMessage(LogLevel.Information, "Stopping service")]
+        private partial void LogStoppingService();
+
+        [LoggerMessage(LogLevel.Warning, "The operation was cancelled")]
+        private partial void LogCancelled();
+
+        #endregion
+
+        #region HandleNoRequest Logging
+
+        [LoggerMessage(LogLevel.Information, "No play session request detected")]
+        private partial void LogNoRequest();
+
+        [LoggerMessage(LogLevel.Error, "Could not probe for kernel driver status")]
+        private partial void LogProbeKernelDriverError(ServiceManagerException ex);
+
+        [LoggerMessage(LogLevel.Warning, "Kernel driver is active but no play session was requested")]
+        private partial void LogKernelDriverActiveWithoutRequest();
+
+        [LoggerMessage(LogLevel.Error, "Could not probe for user service status")]
+        private partial void LogProbeUserServiceError(ServiceManagerException ex);
+
+        [LoggerMessage(LogLevel.Warning, "User service is active but no play session was requested")]
+        private partial void LogUserServiceActiveWithoutRequest();
+
+        [LoggerMessage(LogLevel.Error, "Could not shut down Vanguard")]
+        private partial void LogVanguardShutdownError(ServiceManagerException ex);
+
+        [LoggerMessage(LogLevel.Information, "Vanguard is already stopped")]
+        private partial void LogVanguardAlreadyStopped();
+
+        #endregion
+
+        #region HandleRequestLogging
+
+        [LoggerMessage(LogLevel.Information, "Request detected")]
+        private partial void LogRequest();
+
+        [LoggerMessage(LogLevel.Information, "Vanguard is running")]
+        private partial void LogVanguardRunning();
+
+        [LoggerMessage(LogLevel.Information, "Waiting for play session start")]
+        private partial void LogWaitForPlaySessionStart();
+
+        [LoggerMessage(LogLevel.Error, "Could not wait for play session start")]
+        private partial void LogWaitForPlaySessionStartError(Exception ex);
+
+        [LoggerMessage(LogLevel.Information, "Play session started")]
+        private partial void LogPlaySessionStart();
+
+        [LoggerMessage(LogLevel.Information, "Request complete. Deleting request")]
+        private partial void LogDeleteRequest();
+
+        [LoggerMessage(LogLevel.Error, "Could not delete request")]
+        private partial void LogDeleteRequestError(RequestManagerException ex);
+
+        [LoggerMessage(LogLevel.Information, "Request deleted")]
+        private partial void LogRequestDeleted();
+
+        [LoggerMessage(LogLevel.Information, "Deactivating Vanguard")]
+        private partial void LogDeactivatingVanguard();
+
+        [LoggerMessage(LogLevel.Error, "Could not deactivate Vanguard")]
+        private partial void LogDeactivatingVanguardError(ServiceManagerException ex);
+
+        [LoggerMessage(LogLevel.Information, "Vanguard deactivated")]
+        private partial void LogDeactivatedVanguard();
+
+        [LoggerMessage(LogLevel.Information, "Waiting for play session end")]
+        private partial void LogWaitForPlaySessionEnd();
+
+        [LoggerMessage(LogLevel.Error, "Could not wait for play session end")]
+        private partial void LogWaitForPlaySessionEndError(ServiceManagerException ex);
+
+        [LoggerMessage(LogLevel.Information, "Play session ended")]
+        private partial void LogPlaySessionEnd();
+
+        [LoggerMessage(LogLevel.Information, "Shutting down Vanguard")]
+        private partial void LogShuttingDownVanguard();
+
+        [LoggerMessage(LogLevel.Error, "Could not shut down Vanguard")]
+        private partial void LogShuttingDownVanguardError(ServiceManagerException ex);
+
+        [LoggerMessage(LogLevel.Information, "Vanguard is shut down")]
+        private partial void LogVanguardShutdown();
+
+        [LoggerMessage(LogLevel.Information, "Vanguard is not running")]
+        private partial void LogVanguardNotRunning();
+
+        [LoggerMessage(LogLevel.Error, "Could not activate Vanguard")]
+        private partial void LogVanguardActivationError(ServiceManagerException ex);
+
+        [LoggerMessage(LogLevel.Information, "Waiting for reboot")]
+        private partial void LogWaitForReboot();
+
+        #endregion
     }
 }

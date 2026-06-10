@@ -186,7 +186,7 @@ namespace Manager.Vanguard.Service
             ServiceState serviceState
         );
 
-        [LoggerMessage(LogLevel.Trace, "Waiting {seconds} seconds")]
+        [LoggerMessage(LogLevel.Debug, "Waiting {seconds} seconds")]
         private partial void LogWaitForVanguardShutdownDelay(int seconds);
 
         #endregion
