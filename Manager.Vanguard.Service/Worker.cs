@@ -28,14 +28,6 @@ namespace Manager.Vanguard.Service
         GameManager GManager
     ) : BackgroundService
     {
-        private const int SHUTDOWN_CHECK_INTERVAL_SECONDS =
-#if DEBUG
-            1;
-#else
-            10;
-#endif
-        private const int SHUTDOWN_CHECK_INTERVAL = SHUTDOWN_CHECK_INTERVAL_SECONDS * 1000;
-
         private readonly ILogger logger = Logger;
         private readonly IHostApplicationLifetime hostApplicationLifetime = HostApplicationLifetime;
         private readonly VanguardManager vanguardManager = VManager;
