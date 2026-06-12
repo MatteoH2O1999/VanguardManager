@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Vanguard Manager. If not, see <http://www.gnu.org/licenses/>.
 
+using System.Diagnostics;
 using System.Reflection;
 
 namespace Manager.Vanguard.Common
@@ -27,6 +28,7 @@ namespace Manager.Vanguard.Common
         private const string SERVICE_NAME_METADATA_KEY = "ServiceName";
         private const string KERNEL_LEVEL_SERVICE_NAME_METADATA_KEY = "KernelDriverServiceName";
         private const string USER_LEVEL_SERVICE_NAME_METADATA_KEY = "UserLevelService";
+        private const string GAME_PROCESSES_NAME_METADATA_KEY = "GameProcesses";
 
         /// <summary>
         /// The path to the shared application data folder.
@@ -53,6 +55,11 @@ namespace Manager.Vanguard.Common
         /// </summary>
         public static string UserLevelServiceName { get; }
 
+        /// <summary>
+        /// An array of <see cref="Process.ProcessName"/> related to Riot's games.
+        /// </summary>
+        public static string[] GameProcesses { get; }
+
         static ApplicationData()
         {
             ArgumentNullException.ThrowIfNull(Application.CompanyName);
@@ -68,6 +75,7 @@ namespace Manager.Vanguard.Common
             ServiceName = GetMetadata(SERVICE_NAME_METADATA_KEY);
             KernelLevelServiceName = GetMetadata(KERNEL_LEVEL_SERVICE_NAME_METADATA_KEY);
             UserLevelServiceName = GetMetadata(USER_LEVEL_SERVICE_NAME_METADATA_KEY);
+            GameProcesses = GetMetadata(GAME_PROCESSES_NAME_METADATA_KEY).Split(';');
         }
 
         private static string GetMetadata(string key)

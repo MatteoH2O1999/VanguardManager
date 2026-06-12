@@ -15,11 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Vanguard Manager. If not, see <http://www.gnu.org/licenses/>.
 
+using Manager.Vanguard.Common;
+
 namespace Manager.Vanguard.Service
 {
-    internal sealed class GameManager(ILogger<GameManager> Logger)
+    internal sealed class GameManager(ILogger<GameManager> Logger, RequestManager requestManager)
     {
         private readonly ILogger logger = Logger;
+        private readonly Request? requestedExecutable = requestManager.CheckRequest();
 
         public async Task WaitForPlaySessionStart(CancellationToken stoppingToken)
         {

@@ -19,6 +19,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Manager.Vanguard.Common
 {
+    public sealed record Request(string Executable, string[] Args)
+    {
+        public override string ToString() =>
+            Executable + (Args.Length > 0 ? " with args " + string.Join(' ', Args) : string.Empty);
+    };
+
     public sealed partial class RequestManager(ILogger<RequestManager> Logger)
     {
         private const string REQUEST_FILE_NAME = ".playsession_req";
@@ -87,17 +93,18 @@ namespace Manager.Vanguard.Common
             this.LogDeletedRequest();
         }
 
-        public string? CheckRequest()
+        public Request? CheckRequest()
         {
             this.LogCheckingRequest();
 
-            string? requestedExecutable = null;
+            Request? request = null;
             if (this.RequestExists())
             {
                 this.LogReadingRequestFile();
+                string[] lines;
                 try
                 {
-                    requestedExecutable = File.ReadAllText(requestFileAbsolutePath);
+                    lines = File.ReadAllLines(requestFileAbsolutePath);
                 }
                 catch (Exception ex)
                 {
@@ -105,20 +112,22 @@ namespace Manager.Vanguard.Common
                     throw new RequestManagerException("Could not read from request file", ex);
                 }
 
-                this.LogCheckingRequestedExecutable(requestedExecutable);
-                if (!File.Exists(requestedExecutable))
+                request = new(lines[0], lines[1..]);
+
+                this.LogCheckingRequestedExecutable(request);
+                if (!File.Exists(request.Executable))
                 {
-                    this.LogInvalidRequestedExecutable(requestedExecutable);
+                    this.LogInvalidRequestedExecutable(request.Executable);
                     throw new RequestManagerException("Requested executable could not be found");
                 }
-                this.LogValidRequestFound(requestedExecutable);
+                this.LogValidRequestFound(request);
             }
             else
             {
                 this.LogNoRequestFound();
             }
 
-            return requestedExecutable;
+            return request;
         }
 
         public bool RequestExists()
@@ -186,13 +195,13 @@ namespace Manager.Vanguard.Common
         private partial void LogFailedReadingRequestFile(Exception ex);
 
         [LoggerMessage(2023, LogLevel.Debug, "Checking whether requested executable {executable} is valid")]
-        private partial void LogCheckingRequestedExecutable(string executable);
+        private partial void LogCheckingRequestedExecutable(Request executable);
 
         [LoggerMessage(2024, LogLevel.Error, "Executable {executable} is invalid")]
         private partial void LogInvalidRequestedExecutable(string executable);
 
         [LoggerMessage(2025, LogLevel.Debug, "Executable {executable} requested")]
-        private partial void LogValidRequestFound(string executable);
+        private partial void LogValidRequestFound(Request executable);
 
         [LoggerMessage(2026, LogLevel.Debug, "No request found")]
         private partial void LogNoRequestFound();

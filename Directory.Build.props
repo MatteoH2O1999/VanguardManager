@@ -4,6 +4,7 @@
     <NetVersion>10</NetVersion>
     <KernelDriverServiceName>vgk</KernelDriverServiceName>
     <UserLevelService>vgc</UserLevelService>
+    <GameProcesses>RiotClientServices;RiotClientCrashHandler;Riot Client</GameProcesses>
     <Company>H2O Productions</Company>
     <Product>Vanguard Manager</Product>
     <ServiceName>VanguardManager</ServiceName>
@@ -36,6 +37,7 @@
     <AssemblyMetadata Include="ServiceName" Value="$(ServiceName)" />
     <AssemblyMetadata Include="KernelDriverServiceName" Value="$(KernelDriverServiceName)" />
     <AssemblyMetadata Include="UserLevelService" Value="$(UserLevelService)" />
+    <AssemblyMetadata Include="GameProcesses" Value="$(GameProcesses)" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
