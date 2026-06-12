@@ -208,7 +208,7 @@ namespace Manager.Vanguard.Service
                 {
                     await this.gameManager.WaitForPlaySessionEnd(stoppingToken);
                 }
-                catch (ServiceManagerException ex)
+                catch (Exception ex)
                 {
                     this.LogWaitForPlaySessionEndError(ex);
                     Environment.ExitCode = -1;
@@ -334,7 +334,7 @@ namespace Manager.Vanguard.Service
         private partial void LogWaitForPlaySessionEnd();
 
         [LoggerMessage(LogLevel.Error, "Could not wait for play session end")]
-        private partial void LogWaitForPlaySessionEndError(ServiceManagerException ex);
+        private partial void LogWaitForPlaySessionEndError(Exception ex);
 
         [LoggerMessage(LogLevel.Information, "Play session ended")]
         private partial void LogPlaySessionEnd();
