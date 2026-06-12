@@ -35,12 +35,12 @@ namespace Manager.Vanguard.Common
 
         private readonly ILogger logger = Logger;
 
-        public void CreateRequest(string executable)
+        public void CreateRequest(Request executable)
         {
             this.CreateRequest(executable, true);
         }
 
-        public void CreateRequest(string executable, bool overwrite)
+        public void CreateRequest(Request executable, bool overwrite)
         {
             if (overwrite)
             {
@@ -57,10 +57,12 @@ namespace Manager.Vanguard.Common
                 throw new RequestManagerException("A playsession request already exists");
             }
 
+            string[] lines = [executable.Executable, .. executable.Args];
+
             this.LogWritingToFile();
             try
             {
-                File.WriteAllText(requestFileAbsolutePath, executable);
+                File.WriteAllLines(requestFileAbsolutePath, lines);
             }
             catch (Exception ex)
             {
@@ -145,10 +147,10 @@ namespace Manager.Vanguard.Common
         #region CreateRequest Logging
 
         [LoggerMessage(2000, LogLevel.Debug, "Creating request for executable {executable}")]
-        private partial void LogCreatingRequest(string executable);
+        private partial void LogCreatingRequest(Request executable);
 
         [LoggerMessage(2001, LogLevel.Debug, "Creating or overwriting request for executable {executable}")]
-        private partial void LogCreatingRequestWithOverwrite(string executable);
+        private partial void LogCreatingRequestWithOverwrite(Request executable);
 
         [LoggerMessage(2002, LogLevel.Error, "Request file already exists")]
         private partial void LogRequestAlreadyExists();
@@ -160,7 +162,7 @@ namespace Manager.Vanguard.Common
         private partial void LogFailedWritingToFile(Exception ex);
 
         [LoggerMessage(2005, LogLevel.Debug, "Request for executable {executable} created successfully")]
-        private partial void LogCreatedRequest(string executable);
+        private partial void LogCreatedRequest(Request executable);
 
         #endregion
 
