@@ -110,7 +110,7 @@ namespace Manager.Vanguard.Service
             }
         }
 
-        #region ActivateVanguardLogging
+        #region ActivateVanguard Logging
 
         [LoggerMessage(LogLevel.Information, "Activating Vanguard services")]
         private partial void LogActivatingVanguard();

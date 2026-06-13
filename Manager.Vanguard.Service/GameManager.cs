@@ -20,7 +20,7 @@ using Manager.Vanguard.Common;
 
 namespace Manager.Vanguard.Service
 {
-    internal sealed class GameManager(ILogger<GameManager> Logger, RequestManager requestManager)
+    internal sealed partial class GameManager(ILogger<GameManager> Logger, RequestManager requestManager)
     {
         private const int SESSION_START_CHECK_INTERVAL = 10;
         private const int SESSION_END_CHECK_INTERVAL = 60;
@@ -35,61 +35,54 @@ namespace Manager.Vanguard.Service
 
             while (!this.IsGameOn())
             {
-                this.logger.LogDebug(
-                    "Session is not yet started. Waiting for {} seconds",
-                    SESSION_START_CHECK_INTERVAL
-                );
+                this.LogWaitForPlaySessionStartLoop(SESSION_START_CHECK_INTERVAL);
                 await Task.Delay(sessionStartCheckInterval, stoppingToken);
             }
 
-            this.logger.LogDebug("Session has started");
+            this.LogWaitForPlaySessionStartSuccess();
         }
 
         public async Task WaitForPlaySessionEnd(CancellationToken stoppingToken)
         {
             int sessionEndCheckInterval = SESSION_END_CHECK_INTERVAL * 1000;
             int retries = SESSION_END_CHECK_RETRIES;
-            this.logger.LogInformation(
-                "Checking for play session end every {} seconds ({} iterations required)",
-                SESSION_END_CHECK_INTERVAL,
-                SESSION_END_CHECK_RETRIES
-            );
+            this.LogBeginWaitForPlaySessionEnd(SESSION_END_CHECK_INTERVAL, SESSION_END_CHECK_RETRIES);
 
             while (retries > 0)
             {
                 if (retries == SESSION_END_CHECK_RETRIES)
                 {
-                    this.logger.LogDebug("Checking if game is on");
+                    this.LogWaitForPlaySessionEndCheck();
                 }
                 else
                 {
-                    this.logger.LogDebug("Checking if game is back on ({} iterations left)", retries);
+                    this.LogWaitForPlaySessionEndCheckRemainingIterations(retries);
                 }
 
                 if (this.IsGameOn())
                 {
-                    this.logger.LogTrace("Game is on. Restore retries to {}", SESSION_END_CHECK_RETRIES);
+                    this.LogWaitForPlaySessionEndGameOn(SESSION_END_CHECK_RETRIES);
                     retries = SESSION_END_CHECK_RETRIES;
                 }
                 else
                 {
-                    this.logger.LogTrace("Game is off. Update retries {} -> {}", retries, retries - 1);
+                    this.LogWaitForPlaySessionEndGameOff(retries, retries - 1);
                     retries--;
                 }
 
-                this.logger.LogTrace("Waiting for {} seconds", SESSION_END_CHECK_INTERVAL);
+                this.LogWaitForPlaySessionEndLoop(SESSION_END_CHECK_INTERVAL);
                 await Task.Delay(sessionEndCheckInterval, stoppingToken);
             }
         }
 
         private bool IsGameOn()
         {
-            this.logger.LogDebug("Checking whether user is playing");
+            this.LogCheckingIsGameOn();
 
             bool isGameOn = false;
 
             Process[] activeProcesses = Process.GetProcesses();
-            this.logger.LogTrace("Current active processes: {}", activeProcesses);
+            this.LogIsGameOnCurrentActiveProcesses(activeProcesses);
 
             if (
                 activeProcesses.Any(p =>
@@ -97,7 +90,7 @@ namespace Manager.Vanguard.Service
                 )
             )
             {
-                this.logger.LogDebug("Found a process in active processes");
+                this.LogIsGameOnFoundProcess();
                 isGameOn = true;
             }
             else if (
@@ -105,19 +98,76 @@ namespace Manager.Vanguard.Service
                 && activeProcesses.Any(p => p.MainModule?.FileName == request.Executable)
             )
             {
-                this.logger.LogDebug("Found requested executable in active processes");
+                this.LogIsGameOnFoundRequestedProcess();
                 isGameOn = true;
             }
 
             if (isGameOn)
             {
-                this.logger.LogDebug("Game is on");
+                this.LogIsGameOnTrue();
             }
             else
             {
-                this.logger.LogDebug("Game is off");
+                this.LogIsGameOnFalse();
             }
             return isGameOn;
         }
+
+        #region WaitForPlaySessionStart Logging
+
+        [LoggerMessage(LogLevel.Debug, "Session is not yet started. Waiting for {secondsToWait} seconds")]
+        private partial void LogWaitForPlaySessionStartLoop(int secondsToWait);
+
+        [LoggerMessage(LogLevel.Debug, "Session has started")]
+        private partial void LogWaitForPlaySessionStartSuccess();
+
+        #endregion
+
+        #region WaitForPlaySessionEnd Logging
+
+        [LoggerMessage(
+            LogLevel.Information,
+            "Checking for play session end every {interval} seconds ({retries} iterations required)"
+        )]
+        private partial void LogBeginWaitForPlaySessionEnd(int interval, int retries);
+
+        [LoggerMessage(LogLevel.Debug, "Checking if game is on")]
+        private partial void LogWaitForPlaySessionEndCheck();
+
+        [LoggerMessage(LogLevel.Debug, "Checking if game is back on ({iterations} iterations left)")]
+        private partial void LogWaitForPlaySessionEndCheckRemainingIterations(int iterations);
+
+        [LoggerMessage(LogLevel.Trace, "Game is on. Restore retries to {restoredRetries}")]
+        private partial void LogWaitForPlaySessionEndGameOn(int restoredRetries);
+
+        [LoggerMessage(LogLevel.Trace, "Game is off. Update retries {oldRetries} -> {newRetries}")]
+        private partial void LogWaitForPlaySessionEndGameOff(int oldRetries, int newRetries);
+
+        [LoggerMessage(LogLevel.Trace, "Waiting for {secondsToWait} seconds")]
+        private partial void LogWaitForPlaySessionEndLoop(int secondsToWait);
+
+        #endregion
+
+        #region IsGameOn Logging
+
+        [LoggerMessage(LogLevel.Debug, "Checking whether user is playing")]
+        private partial void LogCheckingIsGameOn();
+
+        [LoggerMessage(LogLevel.Trace, "Current active processes: {processes}")]
+        private partial void LogIsGameOnCurrentActiveProcesses(Process[] processes);
+
+        [LoggerMessage(LogLevel.Debug, "Found a process in active processes")]
+        private partial void LogIsGameOnFoundProcess();
+
+        [LoggerMessage(LogLevel.Debug, "Found requested executable in active processes")]
+        private partial void LogIsGameOnFoundRequestedProcess();
+
+        [LoggerMessage(LogLevel.Debug, "Game is on")]
+        private partial void LogIsGameOnTrue();
+
+        [LoggerMessage(LogLevel.Debug, "Game is off")]
+        private partial void LogIsGameOnFalse();
+
+        #endregion
     }
 }
