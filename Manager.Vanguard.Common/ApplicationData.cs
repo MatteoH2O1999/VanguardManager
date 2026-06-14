@@ -60,6 +60,11 @@ namespace Manager.Vanguard.Common
         /// </summary>
         public static string[] GameProcesses { get; }
 
+        /// <summary>
+        /// Returns <see langword="true"/> if the app is in DEBUG mode.
+        /// </summary>
+        public static bool Debug => File.Exists(Path.Combine(AppData, "debug"));
+
         static ApplicationData()
         {
             ArgumentNullException.ThrowIfNull(Application.CompanyName);

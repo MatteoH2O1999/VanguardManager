@@ -28,7 +28,7 @@ namespace Manager.Vanguard.Common
         {
             logging.AddFile(
                 $"{ApplicationData.AppData}/logs/{appName}-{{Date}}.log",
-                minimumLevel: LogLevel.Information,
+                minimumLevel: ApplicationData.Debug ? LogLevel.Trace : LogLevel.Information,
                 retainedFileCountLimit: 31,
                 fileSizeLimitBytes: MAX_FILE_SIZE,
                 outputTemplate: "{Timestamp:o} {RequestId,13} [{Level}] {Message} ({EventId}){NewLine}{Exception}"
