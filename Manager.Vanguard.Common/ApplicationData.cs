@@ -30,6 +30,8 @@ namespace Manager.Vanguard.Common
         private const string USER_LEVEL_SERVICE_NAME_METADATA_KEY = "UserLevelService";
         private const string GAME_PROCESSES_NAME_METADATA_KEY = "GameProcesses";
 
+        private const string DEBUG_FILE_NAME = "debug";
+
         /// <summary>
         /// The path to the shared application data folder.
         /// </summary>
@@ -63,7 +65,7 @@ namespace Manager.Vanguard.Common
         /// <summary>
         /// Returns <see langword="true"/> if the app is in DEBUG mode.
         /// </summary>
-        public static bool Debug => File.Exists(Path.Combine(AppData, "debug"));
+        public static bool Debug => File.Exists(Path.Combine(AppData, DEBUG_FILE_NAME));
 
         static ApplicationData()
         {
@@ -99,6 +101,23 @@ namespace Manager.Vanguard.Common
                     ? throw new InvalidAssemblyMetadataException($"Duplicate metadata found for key {key}")
                 : serviceAttributes[0].Value
                     ?? throw new InvalidAssemblyMetadataException($"Metadata value for {key} is null");
+        }
+
+        /// <summary>
+        /// Sets the app's DEBUG mode.
+        /// </summary>
+        /// <param name="debug">The app's target DEBUG mode.</param>
+        public static void SwitchDebug(bool debug)
+        {
+            string debugFileName = Path.Combine(AppData, DEBUG_FILE_NAME);
+            if (debug)
+            {
+                File.WriteAllText(debugFileName, string.Empty);
+            }
+            else if (File.Exists(debugFileName))
+            {
+                File.Delete(debugFileName);
+            }
         }
     }
 
