@@ -39,6 +39,8 @@ builder.Services.AddWindowsService(options =>
 });
 
 builder.Services.AddCommons();
+builder.Services.AddTransient<VanguardManager>();
+builder.Services.AddTransient<GameManager>();
 builder.Services.AddHostedService<Worker>();
 
 IHost host = builder.Build();

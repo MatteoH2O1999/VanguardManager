@@ -19,6 +19,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Manager.Vanguard.Common
 {
+    public sealed record Request(string Executable, string[] Args)
+    {
+        public override string ToString() =>
+            Executable + (Args.Length > 0 ? " with args " + string.Join(' ', Args) : string.Empty);
+    };
+
     public sealed partial class RequestManager(ILogger<RequestManager> Logger)
     {
         private const string REQUEST_FILE_NAME = ".playsession_req";
@@ -29,12 +35,12 @@ namespace Manager.Vanguard.Common
 
         private readonly ILogger logger = Logger;
 
-        public void CreateRequest(string executable)
+        public void CreateRequest(Request executable)
         {
             this.CreateRequest(executable, true);
         }
 
-        public void CreateRequest(string executable, bool overwrite)
+        public void CreateRequest(Request executable, bool overwrite)
         {
             if (overwrite)
             {
@@ -51,10 +57,12 @@ namespace Manager.Vanguard.Common
                 throw new RequestManagerException("A playsession request already exists");
             }
 
+            string[] lines = [executable.Executable, .. executable.Args];
+
             this.LogWritingToFile();
             try
             {
-                File.WriteAllText(requestFileAbsolutePath, executable);
+                File.WriteAllLines(requestFileAbsolutePath, lines);
             }
             catch (Exception ex)
             {
@@ -87,17 +95,18 @@ namespace Manager.Vanguard.Common
             this.LogDeletedRequest();
         }
 
-        public string? CheckRequest()
+        public Request? CheckRequest()
         {
             this.LogCheckingRequest();
 
-            string? requestedExecutable = null;
+            Request? request = null;
             if (this.RequestExists())
             {
                 this.LogReadingRequestFile();
+                string[] lines;
                 try
                 {
-                    requestedExecutable = File.ReadAllText(requestFileAbsolutePath);
+                    lines = File.ReadAllLines(requestFileAbsolutePath);
                 }
                 catch (Exception ex)
                 {
@@ -105,20 +114,22 @@ namespace Manager.Vanguard.Common
                     throw new RequestManagerException("Could not read from request file", ex);
                 }
 
-                this.LogCheckingRequestedExecutable(requestedExecutable);
-                if (!File.Exists(requestedExecutable))
+                request = new(lines[0], lines[1..]);
+
+                this.LogCheckingRequestedExecutable(request);
+                if (!File.Exists(request.Executable))
                 {
-                    this.LogInvalidRequestedExecutable(requestedExecutable);
+                    this.LogInvalidRequestedExecutable(request.Executable);
                     throw new RequestManagerException("Requested executable could not be found");
                 }
-                this.LogValidRequestFound(requestedExecutable);
+                this.LogValidRequestFound(request);
             }
             else
             {
                 this.LogNoRequestFound();
             }
 
-            return requestedExecutable;
+            return request;
         }
 
         public bool RequestExists()
@@ -135,79 +146,79 @@ namespace Manager.Vanguard.Common
 
         #region CreateRequest Logging
 
-        [LoggerMessage(1100, LogLevel.Debug, "Creating request for executable {executable}")]
-        private partial void LogCreatingRequest(string executable);
+        [LoggerMessage(2000, LogLevel.Debug, "Creating request for executable {executable}")]
+        private partial void LogCreatingRequest(Request executable);
 
-        [LoggerMessage(1101, LogLevel.Debug, "Creating or overwriting request for executable {executable}")]
-        private partial void LogCreatingRequestWithOverwrite(string executable);
+        [LoggerMessage(2001, LogLevel.Debug, "Creating or overwriting request for executable {executable}")]
+        private partial void LogCreatingRequestWithOverwrite(Request executable);
 
-        [LoggerMessage(1102, LogLevel.Error, "Request file already exists")]
+        [LoggerMessage(2002, LogLevel.Error, "Request file already exists")]
         private partial void LogRequestAlreadyExists();
 
-        [LoggerMessage(1103, LogLevel.Debug, "Writing request to file")]
+        [LoggerMessage(2003, LogLevel.Debug, "Writing request to file")]
         private partial void LogWritingToFile();
 
-        [LoggerMessage(1104, LogLevel.Error, "Error while writing request to file")]
+        [LoggerMessage(2004, LogLevel.Error, "Error while writing request to file")]
         private partial void LogFailedWritingToFile(Exception ex);
 
-        [LoggerMessage(1105, LogLevel.Debug, "Request for executable {executable} created successfully")]
-        private partial void LogCreatedRequest(string executable);
+        [LoggerMessage(2005, LogLevel.Debug, "Request for executable {executable} created successfully")]
+        private partial void LogCreatedRequest(Request executable);
 
         #endregion
 
         #region DeleteRequest Logging
 
-        [LoggerMessage(1110, LogLevel.Debug, "Deleting request file")]
+        [LoggerMessage(2010, LogLevel.Debug, "Deleting request file")]
         private partial void LogDeletingRequest();
 
-        [LoggerMessage(1111, LogLevel.Error, "Request file not found")]
+        [LoggerMessage(2011, LogLevel.Error, "Request file not found")]
         private partial void LogRequestDoesNotExist();
 
-        [LoggerMessage(1112, LogLevel.Debug, "Deleting request file")]
+        [LoggerMessage(2012, LogLevel.Debug, "Deleting request file")]
         private partial void LogDeletingFile();
 
-        [LoggerMessage(1113, LogLevel.Error, "Could not delete request file")]
+        [LoggerMessage(2013, LogLevel.Error, "Could not delete request file")]
         private partial void LogFailedDeletingFile(Exception ex);
 
-        [LoggerMessage(1114, LogLevel.Debug, "Request successfully deleted")]
+        [LoggerMessage(2014, LogLevel.Debug, "Request successfully deleted")]
         private partial void LogDeletedRequest();
 
         #endregion
 
         #region CheckRequest Logging
 
-        [LoggerMessage(1120, LogLevel.Debug, "Checking request status")]
+        [LoggerMessage(2020, LogLevel.Debug, "Checking request status")]
         private partial void LogCheckingRequest();
 
-        [LoggerMessage(1121, LogLevel.Debug, "Reading request file")]
+        [LoggerMessage(2021, LogLevel.Debug, "Reading request file")]
         private partial void LogReadingRequestFile();
 
-        [LoggerMessage(1122, LogLevel.Error, "Could not read request file")]
+        [LoggerMessage(2022, LogLevel.Error, "Could not read request file")]
         private partial void LogFailedReadingRequestFile(Exception ex);
 
-        [LoggerMessage(1123, LogLevel.Debug, "Checking whether requested executable {executable} is valid")]
-        private partial void LogCheckingRequestedExecutable(string executable);
+        [LoggerMessage(2023, LogLevel.Debug, "Checking whether requested executable {executable} is valid")]
+        private partial void LogCheckingRequestedExecutable(Request executable);
 
-        [LoggerMessage(1124, LogLevel.Error, "Executable {executable} is invalid")]
+        [LoggerMessage(2024, LogLevel.Error, "Executable {executable} is invalid")]
         private partial void LogInvalidRequestedExecutable(string executable);
 
-        [LoggerMessage(1125, LogLevel.Debug, "Executable {executable} requested")]
-        private partial void LogValidRequestFound(string executable);
+        [LoggerMessage(2025, LogLevel.Debug, "Executable {executable} requested")]
+        private partial void LogValidRequestFound(Request executable);
 
-        [LoggerMessage(1126, LogLevel.Debug, "No request found")]
+        [LoggerMessage(2026, LogLevel.Debug, "No request found")]
         private partial void LogNoRequestFound();
 
         #endregion
 
         #region RequestExists Logging
 
-        [LoggerMessage(1130, LogLevel.Debug, "Checking whether request file exists")]
+        [LoggerMessage(2030, LogLevel.Debug, "Checking whether request file exists")]
         private partial void LogCheckingRequestExists();
 
-        [LoggerMessage(1131, LogLevel.Debug, "Request file exists")]
+        [LoggerMessage(2031, LogLevel.Debug, "Request file exists")]
         private partial void LogRequestExists();
 
-        [LoggerMessage(1132, LogLevel.Debug, "Request file does not exist")]
+        [LoggerMessage(2032, LogLevel.Debug, "Request file does not exist")]
         private partial void LogRequestNotExists();
 
         #endregion

@@ -32,19 +32,16 @@ namespace InstallerEventSourceCA
             try
             {
                 session.Log("Begin InstallerEventSourceCA");
-
                 string action = session.CustomActionData["Action"];
-                string appName = session.CustomActionData["AppName"];
-                string company = session.CustomActionData["CompanyName"];
-                string dialogString = session.CustomActionData["DialogString"];
-                string serviceName = session.CustomActionData["ServiceName"];
-                string serviceCleanupString = session.CustomActionData["ServiceCleanupString"];
-                string serviceCleanupTemplate = serviceCleanupString.Replace("...", ": [1]");
-
                 switch (action)
                 {
                     case "Install":
                     {
+                        string appName = session.CustomActionData["AppName"];
+                        string serviceName = session.CustomActionData["ServiceName"];
+                        string kernelLevelServiceName = session.CustomActionData["KernelDriverServiceName"];
+                        string userLevelServiceName = session.CustomActionData["UserLevelService"];
+
                         session.Log("Performing 'Install' action");
 
                         string[] services =
@@ -53,7 +50,7 @@ namespace InstallerEventSourceCA
                             .. ServiceController.GetDevices().Select(s => s.ServiceName),
                         ];
 
-                        if (services.Contains("vgk") && services.Contains("vgc"))
+                        if (services.Contains(kernelLevelServiceName) && services.Contains(userLevelServiceName))
                         {
                             session.Log("Assigning permissions to service account");
 
@@ -80,11 +77,15 @@ namespace InstallerEventSourceCA
                                 return ActionResult.Failure;
                             }
 
-                            CommonSecurityDescriptor vgkSec = GetServiceSecurityDescriptor("vgk", scm);
-                            DiscretionaryAcl vgkDacl =
-                                vgkSec.DiscretionaryAcl ?? throw new Exception("DACL cannot be null");
-                            vgkDacl.Purge(sid);
-                            vgkDacl.AddAccess(
+                            CommonSecurityDescriptor kernelLevelServiceSecurity = GetServiceSecurityDescriptor(
+                                kernelLevelServiceName,
+                                scm
+                            );
+                            DiscretionaryAcl kernelLevelServiceDACL =
+                                kernelLevelServiceSecurity.DiscretionaryAcl
+                                ?? throw new Exception("DACL cannot be null");
+                            kernelLevelServiceDACL.Purge(sid);
+                            kernelLevelServiceDACL.AddAccess(
                                 AccessControlType.Allow,
                                 sid,
                                 (int)(
@@ -96,11 +97,14 @@ namespace InstallerEventSourceCA
                                 PropagationFlags.None
                             );
 
-                            CommonSecurityDescriptor vgcSec = GetServiceSecurityDescriptor("vgc", scm);
-                            DiscretionaryAcl vgcDacl =
-                                vgcSec.DiscretionaryAcl ?? throw new Exception("DACL cannot be null");
-                            vgcDacl.Purge(sid);
-                            vgcDacl.AddAccess(
+                            CommonSecurityDescriptor userLevelServiceSecurity = GetServiceSecurityDescriptor(
+                                userLevelServiceName,
+                                scm
+                            );
+                            DiscretionaryAcl userLevelServiceDACL =
+                                userLevelServiceSecurity.DiscretionaryAcl ?? throw new Exception("DACL cannot be null");
+                            userLevelServiceDACL.Purge(sid);
+                            userLevelServiceDACL.AddAccess(
                                 AccessControlType.Allow,
                                 sid,
                                 (int)(
@@ -112,8 +116,8 @@ namespace InstallerEventSourceCA
                                 PropagationFlags.None
                             );
 
-                            SetServiceSecurityDescriptor("vgk", scm, vgkSec);
-                            SetServiceSecurityDescriptor("vgc", scm, vgcSec);
+                            SetServiceSecurityDescriptor(kernelLevelServiceName, scm, kernelLevelServiceSecurity);
+                            SetServiceSecurityDescriptor(userLevelServiceName, scm, userLevelServiceSecurity);
                         }
                         else
                         {
@@ -135,6 +139,12 @@ namespace InstallerEventSourceCA
                     }
                     case "UninstallInit":
                     {
+                        session.Log("Performing 'UninstallInit' action");
+
+                        string serviceName = session.CustomActionData["ServiceName"];
+                        string serviceCleanupString = session.CustomActionData["ServiceCleanupString"];
+                        string serviceCleanupTemplate = serviceCleanupString.Replace("...", ": [1]");
+
                         using (Record rec = new(3))
                         {
                             rec[1] = "Clean service permissions";
@@ -227,6 +237,10 @@ namespace InstallerEventSourceCA
                     case "UninstallFinalize":
                     {
                         session.Log("Performing 'UninstallFinalize' action");
+
+                        string appName = session.CustomActionData["AppName"];
+                        string company = session.CustomActionData["CompanyName"];
+                        string dialogString = session.CustomActionData["DialogString"];
 
                         string manufacturerPath = Path.Combine(
                             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),

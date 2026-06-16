@@ -49,7 +49,7 @@ namespace Manager.Vanguard.Common
                         "Service manager handle is invalid: last error must be a failure."
                     );
                 this.LogErrorOpenSCM(ex);
-                throw new ServiceManagerException("invalid handle to SCM", ex);
+                throw new ServiceManagerException("Invalid handle to SCM", ex);
             }
             this.LogOpenedSCM();
         }
@@ -355,6 +355,35 @@ namespace Manager.Vanguard.Common
             this.LogSetPermissionsSuccess(serviceName, sid);
         }
 
+        public ServiceState CheckStatus(string serviceName)
+        {
+            this.LogCheckingStatus(serviceName);
+
+            using var service = OpenService(this.scm, serviceName, ServiceAccessTypes.SERVICE_QUERY_STATUS);
+            if (service.IsInvalid)
+            {
+                Exception ex =
+                    Win32Error.GetExceptionForLastError()
+                    ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
+                this.LogCheckStatusInvalidHandle(serviceName, ex);
+                throw new ServiceManagerException($"Invalid handle to service {serviceName}", ex);
+            }
+
+            SERVICE_STATUS_PROCESS status;
+            try
+            {
+                status = QueryServiceStatusEx<SERVICE_STATUS_PROCESS>(service);
+            }
+            catch (Win32Exception ex)
+            {
+                this.LogCheckStatusError(serviceName, ex);
+                throw new ServiceManagerException($"Could not query status of service {serviceName}", ex);
+            }
+
+            this.LogCheckStatus(serviceName, status.dwCurrentState);
+            return status.dwCurrentState;
+        }
+
         public void Dispose()
         {
             if (!this.disposed)
@@ -600,6 +629,26 @@ namespace Manager.Vanguard.Common
                 + "{serviceName} successfully set"
         )]
         private partial void LogSetPermissionsSuccess(string serviceName, SecurityIdentifier sid);
+
+        #endregion
+
+        #region CheckStatus Logging
+
+        [LoggerMessage(1090, LogLevel.Debug, "Checking status for service {serviceName}")]
+        private partial void LogCheckingStatus(string serviceName);
+
+        [LoggerMessage(
+            1091,
+            LogLevel.Error,
+            $"Error while opening handle to service {{serviceName}} with desired access {nameof(ServiceAccessTypes.SERVICE_QUERY_STATUS)}"
+        )]
+        private partial void LogCheckStatusInvalidHandle(string serviceName, Exception ex);
+
+        [LoggerMessage(1092, LogLevel.Error, "Error while checking status of service {serviceName}")]
+        private partial void LogCheckStatusError(string serviceName, Win32Exception ex);
+
+        [LoggerMessage(1093, LogLevel.Debug, "Current state of service {serviceName}: {currentState}")]
+        private partial void LogCheckStatus(string serviceName, ServiceState currentState);
 
         #endregion
     }
