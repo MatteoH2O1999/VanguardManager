@@ -93,13 +93,31 @@ namespace Manager.Vanguard.Service
                 this.LogIsGameOnFoundProcess();
                 isGameOn = true;
             }
-            else if (
-                this.requestedExecutable is Request request
-                && activeProcesses.Any(p => p.MainModule?.FileName == request.Executable)
-            )
+            else if (this.requestedExecutable is Request request)
             {
-                this.LogIsGameOnFoundRequestedProcess();
-                isGameOn = true;
+                List<string> processExecutables = [];
+                foreach (Process p in activeProcesses)
+                {
+                    this.LogIsGameOnCheckingProcessModule(p);
+                    ProcessModule? m = null;
+                    try
+                    {
+                        m = p.MainModule;
+                    }
+                    catch (Exception ex)
+                    {
+                        this.LogIsGameOnProcessModuleError(p, ex);
+                    }
+                    if (m is ProcessModule module)
+                    {
+                        processExecutables.Add(module.FileName);
+                    }
+                }
+                if (processExecutables.Any(e => e == request.Executable))
+                {
+                    this.LogIsGameOnFoundRequestedProcess();
+                    isGameOn = true;
+                }
             }
 
             if (isGameOn)
@@ -158,6 +176,12 @@ namespace Manager.Vanguard.Service
 
         [LoggerMessage(LogLevel.Debug, "Found a process in active processes")]
         private partial void LogIsGameOnFoundProcess();
+
+        [LoggerMessage(LogLevel.Trace, $"Reading {nameof(Process.MainModule)} from process {{process}}")]
+        private partial void LogIsGameOnCheckingProcessModule(Process process);
+
+        [LoggerMessage(LogLevel.Trace, $"Cannot read {nameof(Process.MainModule)} from process {{process}}")]
+        private partial void LogIsGameOnProcessModuleError(Process process, Exception ex);
 
         [LoggerMessage(LogLevel.Debug, "Found requested executable in active processes")]
         private partial void LogIsGameOnFoundRequestedProcess();
