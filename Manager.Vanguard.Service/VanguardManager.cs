@@ -112,63 +112,67 @@ namespace Manager.Vanguard.Service
 
         #region ActivateVanguard Logging
 
-        [LoggerMessage(LogLevel.Information, "Activating Vanguard services")]
+        [LoggerMessage(61000, LogLevel.Information, "Activating Vanguard services")]
         private partial void LogActivatingVanguard();
 
         [LoggerMessage(
+            61001,
             LogLevel.Information,
             $"User level service {{serviceName}} start mode set to {nameof(ServiceStartType.SERVICE_DEMAND_START)}"
         )]
         private partial void LogActivatedUserService(string serviceName);
 
         [LoggerMessage(
+            61002,
             LogLevel.Information,
             $"Kernel level driver {{driverName}} start mode set to {nameof(ServiceStartType.SERVICE_SYSTEM_START)}"
         )]
         private partial void LogActivatedKernelDriver(string driverName);
 
-        [LoggerMessage(LogLevel.Information, "Vanguard services activated")]
+        [LoggerMessage(61003, LogLevel.Information, "Vanguard services activated")]
         private partial void LogActivatedVanguard();
 
         #endregion
 
         #region DeactivateVanguard Logging
 
-        [LoggerMessage(LogLevel.Information, "Deactivating Vanguard services")]
+        [LoggerMessage(61100, LogLevel.Information, "Deactivating Vanguard services")]
         private partial void LogDeactivatingVanguard();
 
         [LoggerMessage(
+            61101,
             LogLevel.Information,
             $"User level service {{serviceName}} start mode set to {nameof(ServiceStartType.SERVICE_DISABLED)}"
         )]
         private partial void LogDeactivatedUserService(string serviceName);
 
         [LoggerMessage(
+            61102,
             LogLevel.Information,
             $"Kernel level driver {{driverName}} start mode set to {nameof(ServiceStartType.SERVICE_DISABLED)}"
         )]
         private partial void LogDeactivatedKernelDriver(string driverName);
 
-        [LoggerMessage(LogLevel.Information, "Vanguard services deactivated")]
+        [LoggerMessage(61103, LogLevel.Information, "Vanguard services deactivated")]
         private partial void LogDeactivatedVanguard();
 
         #endregion
 
         #region ShutdownVanguard Logging
 
-        [LoggerMessage(LogLevel.Information, "Shutting down Vanguard services")]
+        [LoggerMessage(61200, LogLevel.Information, "Shutting down Vanguard services")]
         private partial void LogShuttingDownVanguard();
 
-        [LoggerMessage(LogLevel.Information, "Requested immediate shutdown of user level service {serviceName}")]
+        [LoggerMessage(61201, LogLevel.Information, "Requested immediate shutdown of user level service {serviceName}")]
         private partial void LogUserServiceShutdown(string serviceName);
 
-        [LoggerMessage(LogLevel.Information, "Requested immediate shutdown of kernel level driver {driverName}")]
+        [LoggerMessage(61202, LogLevel.Information, "Requested immediate shutdown of kernel level driver {driverName}")]
         private partial void LogKernelDriverShutdown(string driverName);
 
-        [LoggerMessage(LogLevel.Information, "Waiting for Vanguard services shutdown")]
+        [LoggerMessage(61203, LogLevel.Information, "Waiting for Vanguard services shutdown")]
         private partial void LogWaitingForVanguardShutdown();
 
-        [LoggerMessage(LogLevel.Information, "Vanguard services successfully shut down")]
+        [LoggerMessage(61204, LogLevel.Information, "Vanguard services successfully shut down")]
         private partial void LogVanguardShutdown();
 
         #endregion
@@ -176,6 +180,7 @@ namespace Manager.Vanguard.Service
         #region WaitForVanguardShutdown Logging
 
         [LoggerMessage(
+            61300,
             LogLevel.Debug,
             "Kernel level driver {driverName} state: {driverState}; User level service {serviceName} state: {serviceState}"
         )]
@@ -186,7 +191,7 @@ namespace Manager.Vanguard.Service
             ServiceState serviceState
         );
 
-        [LoggerMessage(LogLevel.Debug, "Waiting {seconds} seconds")]
+        [LoggerMessage(61301, LogLevel.Debug, "Waiting {seconds} seconds")]
         private partial void LogWaitForVanguardShutdownDelay(int seconds);
 
         #endregion
