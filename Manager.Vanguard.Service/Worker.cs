@@ -188,20 +188,6 @@ namespace Manager.Vanguard.Service
                 }
 
                 this.LogRequestDeleted();
-                this.LogDeactivatingVanguard();
-
-                try
-                {
-                    this.vanguardManager.DeactivateVanguard();
-                }
-                catch (ServiceManagerException ex)
-                {
-                    this.LogDeactivatingVanguardError(ex);
-                    Environment.ExitCode = -1;
-                    return;
-                }
-
-                this.LogDeactivatedVanguard();
                 this.LogWaitForPlaySessionEnd();
 
                 try
@@ -216,6 +202,20 @@ namespace Manager.Vanguard.Service
                 }
 
                 this.LogPlaySessionEnd();
+                this.LogDeactivatingVanguard();
+
+                try
+                {
+                    this.vanguardManager.DeactivateVanguard();
+                }
+                catch (ServiceManagerException ex)
+                {
+                    this.LogDeactivatingVanguardError(ex);
+                    Environment.ExitCode = -1;
+                    return;
+                }
+
+                this.LogDeactivatedVanguard();
                 this.LogShuttingDownVanguard();
 
                 try
