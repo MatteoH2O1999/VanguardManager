@@ -70,8 +70,11 @@ namespace Manager.Vanguard.Service
                     retries--;
                 }
 
-                this.LogWaitForPlaySessionEndLoop(SESSION_END_CHECK_INTERVAL);
-                await Task.Delay(sessionEndCheckInterval, stoppingToken);
+                if (retries != 0)
+                {
+                    this.LogWaitForPlaySessionEndLoop(SESSION_END_CHECK_INTERVAL);
+                    await Task.Delay(sessionEndCheckInterval, stoppingToken);
+                }
             }
         }
 
