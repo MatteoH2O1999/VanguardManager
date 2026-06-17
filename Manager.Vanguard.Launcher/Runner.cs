@@ -45,13 +45,14 @@ namespace Manager.Vanguard.Launcher
                     this.LogStartupRunner();
                     try
                     {
-                        this.startupRunner.Run(args);
+                        this.startupRunner.Run();
                     }
                     catch (Exception ex)
                     {
                         this.LogStartupRunnerError(ex);
                         Environment.ExitCode = -1;
                     }
+                    this.LogStoppingRunner();
                     return;
                 }
                 else if (action == "request")
@@ -66,6 +67,7 @@ namespace Manager.Vanguard.Launcher
                         this.LogRequestRunnerError(ex);
                         Environment.ExitCode = -1;
                     }
+                    this.LogStoppingRunner();
                     return;
                 }
                 else
@@ -84,6 +86,7 @@ namespace Manager.Vanguard.Launcher
                 this.LogGUIRunnerError(ex);
                 Environment.ExitCode = -1;
             }
+            this.LogStoppingRunner();
         }
 
         [LoggerMessage(LogLevel.Information, "Starting launcher with args {args}")]
@@ -112,5 +115,8 @@ namespace Manager.Vanguard.Launcher
 
         [LoggerMessage(LogLevel.Error, "Error in GUI")]
         private partial void LogGUIRunnerError(Exception ex);
+
+        [LoggerMessage(LogLevel.Information, "Stopping launcher")]
+        private partial void LogStoppingRunner();
     }
 }
