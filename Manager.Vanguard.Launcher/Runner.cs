@@ -60,7 +60,7 @@ namespace Manager.Vanguard.Launcher
                     this.LogRequestRunner();
                     try
                     {
-                        this.requestRunner.Run(args);
+                        this.requestRunner.Run(args[1..]);
                     }
                     catch (Exception ex)
                     {
@@ -79,7 +79,7 @@ namespace Manager.Vanguard.Launcher
             this.LogGUIRunner();
             try
             {
-                this.guiRunner.Run(args);
+                this.guiRunner.Run();
             }
             catch (Exception ex)
             {

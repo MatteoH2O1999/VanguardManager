@@ -23,7 +23,7 @@ namespace Manager.Vanguard.Launcher
     {
         private readonly ILogger logger = Logger;
 
-        public void Run(string[] args)
+        public void Run()
         {
             ApplicationConfiguration.Initialize();
         }
