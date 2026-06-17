@@ -19,17 +19,98 @@ using Microsoft.Extensions.Logging;
 
 namespace Manager.Vanguard.Launcher
 {
-    public sealed partial class Runner(ILogger<Runner> Logger)
+    internal sealed partial class Runner(
+        ILogger<Runner> Logger,
+        GUIRunner GRunner,
+        StartupRunner SRunner,
+        RequestRunner RRunner
+    )
     {
         private readonly ILogger logger = Logger;
+        private readonly GUIRunner guiRunner = GRunner;
+        private readonly RequestRunner requestRunner = RRunner;
+        private readonly StartupRunner startupRunner = SRunner;
 
         public void Run(string[] args)
         {
-            ApplicationConfiguration.Initialize();
-            this.LogRun(args);
+            this.LogArgs(args);
+
+            if (args.Length > 0)
+            {
+                string action = args[0];
+                this.LogAction(action);
+
+                if (action == "startup")
+                {
+                    this.LogStartupRunner();
+                    try
+                    {
+                        this.startupRunner.Run(args);
+                    }
+                    catch (Exception ex)
+                    {
+                        this.LogStartupRunnerError(ex);
+                        Environment.ExitCode = -1;
+                    }
+                    return;
+                }
+                else if (action == "request")
+                {
+                    this.LogRequestRunner();
+                    try
+                    {
+                        this.requestRunner.Run(args);
+                    }
+                    catch (Exception ex)
+                    {
+                        this.LogRequestRunnerError(ex);
+                        Environment.ExitCode = -1;
+                    }
+                    return;
+                }
+                else
+                {
+                    this.LogInvalidAction(action);
+                }
+            }
+
+            this.LogGUIRunner();
+            try
+            {
+                this.guiRunner.Run(args);
+            }
+            catch (Exception ex)
+            {
+                this.LogGUIRunnerError(ex);
+                Environment.ExitCode = -1;
+            }
         }
 
-        [LoggerMessage(LogLevel.Warning, "TODO: Implement runner for args [{args}]")]
-        private partial void LogRun(string[] args);
+        [LoggerMessage(LogLevel.Information, "Starting launcher with args {args}")]
+        private partial void LogArgs(string[] args);
+
+        [LoggerMessage(LogLevel.Debug, "Found action {action}")]
+        private partial void LogAction(string action);
+
+        [LoggerMessage(LogLevel.Information, "Starting startup script")]
+        private partial void LogStartupRunner();
+
+        [LoggerMessage(LogLevel.Error, "Error in startup script")]
+        private partial void LogStartupRunnerError(Exception ex);
+
+        [LoggerMessage(LogLevel.Information, "Starting request handler")]
+        private partial void LogRequestRunner();
+
+        [LoggerMessage(LogLevel.Error, "Error in request handler")]
+        private partial void LogRequestRunnerError(Exception ex);
+
+        [LoggerMessage(LogLevel.Warning, "Invalid action: {action}. Falling back to GUI")]
+        private partial void LogInvalidAction(string action);
+
+        [LoggerMessage(LogLevel.Information, "Starting GUI")]
+        private partial void LogGUIRunner();
+
+        [LoggerMessage(LogLevel.Error, "Error in GUI")]
+        private partial void LogGUIRunnerError(Exception ex);
     }
 }

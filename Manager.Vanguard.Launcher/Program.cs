@@ -28,7 +28,7 @@ namespace Manager.Vanguard.Launcher
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        private static void Main(string[] args)
+        public static void Main(string[] args)
         {
             HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
@@ -43,12 +43,24 @@ namespace Manager.Vanguard.Launcher
             builder.Logging.SetMinimumLevel(LogLevel.Trace);
 #endif
 
+            builder.Services.AddCommons();
+            builder.Services.AddTransient<GUIRunner>();
+            builder.Services.AddTransient<RequestRunner>();
+            builder.Services.AddTransient<StartupRunner>();
             builder.Services.AddTransient<Runner>();
 
             using IHost app = builder.Build();
 
-            Runner runner = app.Services.GetRequiredService<Runner>();
-            runner.Run(args);
+            try
+            {
+                Runner runner = app.Services.GetRequiredService<Runner>();
+                runner.Run(args);
+            }
+            catch (Exception ex)
+            {
+                ILogger logger = app.Services.GetRequiredService<ILogger>();
+                Logs.LogOutOfHostCrash(logger, ex);
+            }
         }
     }
 }
