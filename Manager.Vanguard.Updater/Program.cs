@@ -46,6 +46,6 @@ try
 }
 catch (Exception ex)
 {
-    ILogger logger = app.Services.GetRequiredService<ILogger>();
+    ILogger logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger(string.Empty);
     Logs.LogOutOfHostCrash(logger, ex);
 }

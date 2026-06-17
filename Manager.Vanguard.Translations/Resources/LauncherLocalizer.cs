@@ -22,5 +22,9 @@ namespace Manager.Vanguard.Translations.Resources
     public sealed class LauncherLocalizer(IStringLocalizer<LauncherLocalizer> Localizer)
     {
         private readonly IStringLocalizer localizer = Localizer;
+
+        public string RebootPrompt => this.localizer.GetString("RebootPrompt");
+
+        public string RebootPromptTitle => this.localizer.GetString("RebootPromptTitle");
     }
 }

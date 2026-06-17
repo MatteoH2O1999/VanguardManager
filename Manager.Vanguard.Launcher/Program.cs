@@ -16,6 +16,7 @@
 // along with Vanguard Manager. If not, see <http://www.gnu.org/licenses/>.
 
 using Manager.Vanguard.Common;
+using Manager.Vanguard.Translations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -43,6 +44,7 @@ namespace Manager.Vanguard.Launcher
             builder.Logging.SetMinimumLevel(LogLevel.Trace);
 #endif
 
+            builder.Services.AddLocalizations();
             builder.Services.AddCommons();
             builder.Services.AddTransient<GUIRunner>();
             builder.Services.AddTransient<RequestRunner>();
@@ -58,7 +60,7 @@ namespace Manager.Vanguard.Launcher
             }
             catch (Exception ex)
             {
-                ILogger logger = app.Services.GetRequiredService<ILogger>();
+                ILogger logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger(string.Empty);
                 Logs.LogOutOfHostCrash(logger, ex);
             }
         }

@@ -31,6 +31,7 @@ namespace Manager.Vanguard.Common
         private const string GAME_PROCESSES_NAME_METADATA_KEY = "GameProcesses";
 
         private const string DEBUG_FILE_NAME = "debug";
+        private const string AUTO_RESTART_FILE_NAME = "restart";
 
         /// <summary>
         /// The path to the shared application data folder.
@@ -66,6 +67,12 @@ namespace Manager.Vanguard.Common
         /// Returns <see langword="true"/> if the app is in DEBUG mode.
         /// </summary>
         public static bool Debug => File.Exists(Path.Combine(AppData, DEBUG_FILE_NAME));
+
+        /// <summary>
+        /// Returns <see langword="true"/> if the launcher should automatically reboot the system
+        /// after creating a request.
+        /// </summary>
+        public static bool AutoRestart => File.Exists(Path.Combine(AppData, AUTO_RESTART_FILE_NAME));
 
         static ApplicationData()
         {
@@ -117,6 +124,23 @@ namespace Manager.Vanguard.Common
             else if (File.Exists(debugFileName))
             {
                 File.Delete(debugFileName);
+            }
+        }
+
+        /// <summary>
+        /// Set's the app auto restart switch.
+        /// </summary>
+        /// <param name="autoRestart">The app's target auto restart mode.</param>
+        public static void SwitchAutoRestart(bool autoRestart)
+        {
+            string autoRestartFileName = Path.Combine(AppData, AUTO_RESTART_FILE_NAME);
+            if (autoRestart)
+            {
+                File.WriteAllText(autoRestartFileName, string.Empty);
+            }
+            else if (File.Exists(autoRestartFileName))
+            {
+                File.Delete(autoRestartFileName);
             }
         }
     }

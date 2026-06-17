@@ -9,7 +9,7 @@
     },
     "launcher (request)": {
       "commandName": "Project",
-      "commandLineArgs": "request"
+      "commandLineArgs": "request\r\nC:\\WINDOWS\\system32\\cmd.exe"
     }
   }
 }
