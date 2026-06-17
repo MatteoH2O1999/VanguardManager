@@ -60,6 +60,9 @@ namespace Manager.Vanguard.Launcher
 
             if (this.serviceManager.CheckStatus(ApplicationData.KernelLevelServiceName) == ServiceState.SERVICE_RUNNING)
             {
+                Trace.Assert(
+                    this.serviceManager.CheckStatus(ApplicationData.ServiceName) == ServiceState.SERVICE_RUNNING
+                );
                 this.Start(executable, executableArgs);
             }
             else
