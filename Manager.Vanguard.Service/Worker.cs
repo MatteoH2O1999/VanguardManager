@@ -250,111 +250,111 @@ namespace Manager.Vanguard.Service
 
         #region ExecuteAsync Logging
 
-        [LoggerMessage(LogLevel.Debug, "Acquiring service lock")]
+        [LoggerMessage(65000, LogLevel.Debug, "Acquiring service lock")]
         private partial void LogAcquiringServiceLock();
 
-        [LoggerMessage(LogLevel.Error, "Could not acquire service lock")]
+        [LoggerMessage(65001, LogLevel.Error, "Could not acquire service lock")]
         private partial void LogServiceLockError(LockException ex);
 
-        [LoggerMessage(LogLevel.Error, "Service lock already in use by another process")]
+        [LoggerMessage(65002, LogLevel.Error, "Service lock already in use by another process")]
         private partial void LogServiceLockAlreadyInUse();
 
-        [LoggerMessage(LogLevel.Information, "Service lock acquired")]
+        [LoggerMessage(65003, LogLevel.Information, "Service lock acquired")]
         private partial void LogServiceLockAcquired();
 
-        [LoggerMessage(LogLevel.Information, "Stopping service")]
+        [LoggerMessage(65004, LogLevel.Information, "Stopping service")]
         private partial void LogStoppingService();
 
-        [LoggerMessage(LogLevel.Warning, "The operation was cancelled")]
+        [LoggerMessage(65005, LogLevel.Warning, "The operation was cancelled")]
         private partial void LogCancelled();
 
         #endregion
 
         #region HandleNoRequest Logging
 
-        [LoggerMessage(LogLevel.Information, "No play session request detected")]
+        [LoggerMessage(65100, LogLevel.Information, "No play session request detected")]
         private partial void LogNoRequest();
 
-        [LoggerMessage(LogLevel.Error, "Could not probe for kernel driver status")]
+        [LoggerMessage(65101, LogLevel.Error, "Could not probe for kernel driver status")]
         private partial void LogProbeKernelDriverError(ServiceManagerException ex);
 
-        [LoggerMessage(LogLevel.Warning, "Kernel driver is active but no play session was requested")]
+        [LoggerMessage(65102, LogLevel.Warning, "Kernel driver is active but no play session was requested")]
         private partial void LogKernelDriverActiveWithoutRequest();
 
-        [LoggerMessage(LogLevel.Error, "Could not probe for user service status")]
+        [LoggerMessage(65103, LogLevel.Error, "Could not probe for user service status")]
         private partial void LogProbeUserServiceError(ServiceManagerException ex);
 
-        [LoggerMessage(LogLevel.Warning, "User service is active but no play session was requested")]
+        [LoggerMessage(65104, LogLevel.Warning, "User service is active but no play session was requested")]
         private partial void LogUserServiceActiveWithoutRequest();
 
-        [LoggerMessage(LogLevel.Error, "Could not shut down Vanguard")]
+        [LoggerMessage(65105, LogLevel.Error, "Could not shut down Vanguard")]
         private partial void LogVanguardShutdownError(ServiceManagerException ex);
 
-        [LoggerMessage(LogLevel.Information, "Vanguard is already stopped")]
+        [LoggerMessage(65106, LogLevel.Information, "Vanguard is already stopped")]
         private partial void LogVanguardAlreadyStopped();
 
         #endregion
 
         #region HandleRequestLogging
 
-        [LoggerMessage(LogLevel.Information, "Request detected")]
+        [LoggerMessage(65200, LogLevel.Information, "Request detected")]
         private partial void LogRequest();
 
-        [LoggerMessage(LogLevel.Information, "Vanguard is running")]
+        [LoggerMessage(65201, LogLevel.Information, "Vanguard is running")]
         private partial void LogVanguardRunning();
 
-        [LoggerMessage(LogLevel.Information, "Waiting for play session start")]
+        [LoggerMessage(65202, LogLevel.Information, "Waiting for play session start")]
         private partial void LogWaitForPlaySessionStart();
 
-        [LoggerMessage(LogLevel.Error, "Could not wait for play session start")]
+        [LoggerMessage(65203, LogLevel.Error, "Could not wait for play session start")]
         private partial void LogWaitForPlaySessionStartError(Exception ex);
 
-        [LoggerMessage(LogLevel.Information, "Play session started")]
+        [LoggerMessage(65204, LogLevel.Information, "Play session started")]
         private partial void LogPlaySessionStart();
 
-        [LoggerMessage(LogLevel.Information, "Request complete. Deleting request")]
+        [LoggerMessage(65205, LogLevel.Information, "Request complete. Deleting request")]
         private partial void LogDeleteRequest();
 
-        [LoggerMessage(LogLevel.Error, "Could not delete request")]
+        [LoggerMessage(65206, LogLevel.Error, "Could not delete request")]
         private partial void LogDeleteRequestError(RequestManagerException ex);
 
-        [LoggerMessage(LogLevel.Information, "Request deleted")]
+        [LoggerMessage(65207, LogLevel.Information, "Request deleted")]
         private partial void LogRequestDeleted();
 
-        [LoggerMessage(LogLevel.Information, "Deactivating Vanguard")]
+        [LoggerMessage(65208, LogLevel.Information, "Deactivating Vanguard")]
         private partial void LogDeactivatingVanguard();
 
-        [LoggerMessage(LogLevel.Error, "Could not deactivate Vanguard")]
+        [LoggerMessage(65209, LogLevel.Error, "Could not deactivate Vanguard")]
         private partial void LogDeactivatingVanguardError(ServiceManagerException ex);
 
-        [LoggerMessage(LogLevel.Information, "Vanguard deactivated")]
+        [LoggerMessage(65210, LogLevel.Information, "Vanguard deactivated")]
         private partial void LogDeactivatedVanguard();
 
-        [LoggerMessage(LogLevel.Information, "Waiting for play session end")]
+        [LoggerMessage(65211, LogLevel.Information, "Waiting for play session end")]
         private partial void LogWaitForPlaySessionEnd();
 
-        [LoggerMessage(LogLevel.Error, "Could not wait for play session end")]
+        [LoggerMessage(65212, LogLevel.Error, "Could not wait for play session end")]
         private partial void LogWaitForPlaySessionEndError(Exception ex);
 
-        [LoggerMessage(LogLevel.Information, "Play session ended")]
+        [LoggerMessage(65213, LogLevel.Information, "Play session ended")]
         private partial void LogPlaySessionEnd();
 
-        [LoggerMessage(LogLevel.Information, "Shutting down Vanguard")]
+        [LoggerMessage(65214, LogLevel.Information, "Shutting down Vanguard")]
         private partial void LogShuttingDownVanguard();
 
-        [LoggerMessage(LogLevel.Error, "Could not shut down Vanguard")]
+        [LoggerMessage(65215, LogLevel.Error, "Could not shut down Vanguard")]
         private partial void LogShuttingDownVanguardError(ServiceManagerException ex);
 
-        [LoggerMessage(LogLevel.Information, "Vanguard is shut down")]
+        [LoggerMessage(65216, LogLevel.Information, "Vanguard is shut down")]
         private partial void LogVanguardShutdown();
 
-        [LoggerMessage(LogLevel.Information, "Vanguard is not running")]
+        [LoggerMessage(65217, LogLevel.Information, "Vanguard is not running")]
         private partial void LogVanguardNotRunning();
 
-        [LoggerMessage(LogLevel.Error, "Could not activate Vanguard")]
+        [LoggerMessage(65218, LogLevel.Error, "Could not activate Vanguard")]
         private partial void LogVanguardActivationError(ServiceManagerException ex);
 
-        [LoggerMessage(LogLevel.Information, "Waiting for reboot")]
+        [LoggerMessage(65219, LogLevel.Information, "Waiting for reboot")]
         private partial void LogWaitForReboot();
 
         #endregion

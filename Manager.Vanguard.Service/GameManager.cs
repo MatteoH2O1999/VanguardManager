@@ -136,10 +136,10 @@ namespace Manager.Vanguard.Service
 
         #region WaitForPlaySessionStart Logging
 
-        [LoggerMessage(LogLevel.Debug, "Session is not yet started. Waiting for {secondsToWait} seconds")]
+        [LoggerMessage(60000, LogLevel.Debug, "Session is not yet started. Waiting for {secondsToWait} seconds")]
         private partial void LogWaitForPlaySessionStartLoop(int secondsToWait);
 
-        [LoggerMessage(LogLevel.Debug, "Session has started")]
+        [LoggerMessage(60001, LogLevel.Debug, "Session has started")]
         private partial void LogWaitForPlaySessionStartSuccess();
 
         #endregion
@@ -147,52 +147,53 @@ namespace Manager.Vanguard.Service
         #region WaitForPlaySessionEnd Logging
 
         [LoggerMessage(
+            60100,
             LogLevel.Information,
             "Checking for play session end every {interval} seconds ({retries} iterations required)"
         )]
         private partial void LogBeginWaitForPlaySessionEnd(int interval, int retries);
 
-        [LoggerMessage(LogLevel.Debug, "Checking if game is on")]
+        [LoggerMessage(60101, LogLevel.Debug, "Checking if game is on")]
         private partial void LogWaitForPlaySessionEndCheck();
 
-        [LoggerMessage(LogLevel.Debug, "Checking if game is back on ({iterations} iterations left)")]
+        [LoggerMessage(60102, LogLevel.Debug, "Checking if game is back on ({iterations} iterations left)")]
         private partial void LogWaitForPlaySessionEndCheckRemainingIterations(int iterations);
 
-        [LoggerMessage(LogLevel.Trace, "Game is on. Restore retries to {restoredRetries}")]
+        [LoggerMessage(60103, LogLevel.Trace, "Game is on. Restore retries to {restoredRetries}")]
         private partial void LogWaitForPlaySessionEndGameOn(int restoredRetries);
 
-        [LoggerMessage(LogLevel.Trace, "Game is off. Update retries {oldRetries} -> {newRetries}")]
+        [LoggerMessage(60104, LogLevel.Trace, "Game is off. Update retries {oldRetries} -> {newRetries}")]
         private partial void LogWaitForPlaySessionEndGameOff(int oldRetries, int newRetries);
 
-        [LoggerMessage(LogLevel.Trace, "Waiting for {secondsToWait} seconds")]
+        [LoggerMessage(60105, LogLevel.Trace, "Waiting for {secondsToWait} seconds")]
         private partial void LogWaitForPlaySessionEndLoop(int secondsToWait);
 
         #endregion
 
         #region IsGameOn Logging
 
-        [LoggerMessage(LogLevel.Debug, "Checking whether user is playing")]
+        [LoggerMessage(60200, LogLevel.Debug, "Checking whether user is playing")]
         private partial void LogCheckingIsGameOn();
 
-        [LoggerMessage(LogLevel.Trace, "Current active processes: {processes}")]
+        [LoggerMessage(60201, LogLevel.Trace, "Current active processes: {processes}")]
         private partial void LogIsGameOnCurrentActiveProcesses(Process[] processes);
 
-        [LoggerMessage(LogLevel.Debug, "Found a process in active processes")]
+        [LoggerMessage(60202, LogLevel.Debug, "Found a process in active processes")]
         private partial void LogIsGameOnFoundProcess();
 
-        [LoggerMessage(LogLevel.Trace, $"Reading {nameof(Process.MainModule)} from process {{process}}")]
+        [LoggerMessage(60203, LogLevel.Trace, $"Reading {nameof(Process.MainModule)} from process {{process}}")]
         private partial void LogIsGameOnCheckingProcessModule(Process process);
 
-        [LoggerMessage(LogLevel.Trace, $"Cannot read {nameof(Process.MainModule)} from process {{process}}")]
+        [LoggerMessage(60204, LogLevel.Trace, $"Cannot read {nameof(Process.MainModule)} from process {{process}}")]
         private partial void LogIsGameOnProcessModuleError(Process process, Exception ex);
 
-        [LoggerMessage(LogLevel.Debug, "Found requested executable in active processes")]
+        [LoggerMessage(60205, LogLevel.Debug, "Found requested executable in active processes")]
         private partial void LogIsGameOnFoundRequestedProcess();
 
-        [LoggerMessage(LogLevel.Debug, "Game is on")]
+        [LoggerMessage(60206, LogLevel.Debug, "Game is on")]
         private partial void LogIsGameOnTrue();
 
-        [LoggerMessage(LogLevel.Debug, "Game is off")]
+        [LoggerMessage(60207, LogLevel.Debug, "Game is off")]
         private partial void LogIsGameOnFalse();
 
         #endregion
