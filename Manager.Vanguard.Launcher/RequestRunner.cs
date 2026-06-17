@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Vanguard Manager. If not, see <http://www.gnu.org/licenses/>.
 
+using System.Diagnostics;
 using Manager.Vanguard.Common;
 using Manager.Vanguard.Translations;
 using Microsoft.Extensions.Logging;
@@ -57,6 +58,32 @@ namespace Manager.Vanguard.Launcher
                 throw new ArgumentException("Requested exectuable path is not absolute");
             }
 
+            if (this.serviceManager.CheckStatus(ApplicationData.KernelLevelServiceName) == ServiceState.SERVICE_RUNNING)
+            {
+                this.Start(executable, executableArgs);
+            }
+            else
+            {
+                this.PrepareRequest(executable, executableArgs);
+            }
+        }
+
+        private void Start(string executable, string[] executableArgs)
+        {
+            ProcessStartInfo startInfo = new() { FileName = executable };
+            foreach (string arg in executableArgs)
+            {
+                startInfo.ArgumentList.Add(arg);
+            }
+            this.LogProcessStartInfo(startInfo);
+
+            using Process process = new() { StartInfo = startInfo };
+            this.LogStartingProcess();
+            process.Start();
+        }
+
+        private void PrepareRequest(string executable, string[] executableArgs)
+        {
             this.LogCreatingRequest(executable, executableArgs);
             this.requestManager.CreateRequest(new(executable, executableArgs));
             this.LogCreatedRequest(executable, executableArgs);
@@ -129,5 +156,11 @@ namespace Manager.Vanguard.Launcher
 
         [LoggerMessage(LogLevel.Information, "Waiting for reboot")]
         private partial void LogWaitForReboot();
+
+        [LoggerMessage(LogLevel.Debug, "Running process with start info {startInfo}")]
+        private partial void LogProcessStartInfo(ProcessStartInfo startInfo);
+
+        [LoggerMessage(LogLevel.Information, "Starting process")]
+        private partial void LogStartingProcess();
     }
 }
