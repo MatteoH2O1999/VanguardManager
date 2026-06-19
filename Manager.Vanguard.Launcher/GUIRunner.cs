@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Vanguard Manager. If not, see <http://www.gnu.org/licenses/>.
 
+using Manager.Vanguard.Launcher.GUI;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Manager.Vanguard.Launcher
@@ -30,10 +32,17 @@ namespace Manager.Vanguard.Launcher
             Application.Run(this.mainWindow);
         }
 
-        [LoggerMessage(LogLevel.Information, "Application iniitalized")]
-        private partial void LogInitialized();
-
         [LoggerMessage(LogLevel.Information, "Opening main window")]
         private partial void LogOpeningMainWindow();
+    }
+
+    internal static class GUIRegistration
+    {
+        public static T AddGUI<T>(this T services)
+            where T : IServiceCollection
+        {
+            services.AddTransient<MainWindow>();
+            return services;
+        }
     }
 }

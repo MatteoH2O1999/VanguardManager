@@ -46,7 +46,7 @@ namespace Manager.Vanguard.Launcher
 
             builder.Services.AddLocalizations();
             builder.Services.AddCommons();
-            builder.Services.AddTransient<MainWindow>();
+            builder.Services.AddGUI();
             builder.Services.AddTransient<GUIRunner>();
             builder.Services.AddTransient<RequestRunner>();
             builder.Services.AddTransient<StartupRunner>();

@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2026 Matteo Dell'Acqua
+// Copyright (C) 2026 Matteo Dell'Acqua
 //
 // This file is part of Vanguard Manager.
 //
@@ -15,15 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Vanguard Manager. If not, see <http://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-
-namespace Manager.Vanguard.Launcher
+namespace Manager.Vanguard.Launcher.GUI
 {
     public partial class MainWindow : Form
     {
