@@ -1,4 +1,4 @@
-// Copyright (C) 2026 Matteo Dell'Acqua
+﻿// Copyright (C) 2026 Matteo Dell'Acqua
 //
 // This file is part of Vanguard Manager.
 //
@@ -15,25 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Vanguard Manager. If not, see <http://www.gnu.org/licenses/>.
 
-using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Text;
+using System.Windows.Forms;
 
 namespace Manager.Vanguard.Launcher
 {
-    internal sealed partial class GUIRunner(ILogger<GUIRunner> Logger, MainWindow MainWindow)
+    public partial class MainWindow : Form
     {
-        private readonly ILogger logger = Logger;
-        private readonly MainWindow mainWindow = MainWindow;
-
-        public void Run()
+        public MainWindow()
         {
-            this.LogOpeningMainWindow();
-            Application.Run(this.mainWindow);
+            InitializeComponent();
         }
-
-        [LoggerMessage(LogLevel.Information, "Application iniitalized")]
-        private partial void LogInitialized();
-
-        [LoggerMessage(LogLevel.Information, "Opening main window")]
-        private partial void LogOpeningMainWindow();
     }
 }

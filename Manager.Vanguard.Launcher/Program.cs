@@ -23,7 +23,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Manager.Vanguard.Launcher
 {
-    internal static class Program
+    internal static partial class Program
     {
         /// <summary>
         ///  The main entry point for the application.
@@ -46,12 +46,16 @@ namespace Manager.Vanguard.Launcher
 
             builder.Services.AddLocalizations();
             builder.Services.AddCommons();
+            builder.Services.AddTransient<MainWindow>();
             builder.Services.AddTransient<GUIRunner>();
             builder.Services.AddTransient<RequestRunner>();
             builder.Services.AddTransient<StartupRunner>();
             builder.Services.AddTransient<Runner>();
 
             using IHost app = builder.Build();
+            ILogger<IHost> appLogger = app.Services.GetRequiredService<ILogger<IHost>>();
+            ApplicationConfiguration.Initialize();
+            LogInitialized(appLogger);
 
             try
             {
@@ -60,9 +64,11 @@ namespace Manager.Vanguard.Launcher
             }
             catch (Exception ex)
             {
-                ILogger logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger(string.Empty);
-                Logs.LogOutOfHostCrash(logger, ex);
+                Logs.LogOutOfHostCrash(appLogger, ex);
             }
         }
+
+        [LoggerMessage(LogLevel.Information, "GUI configuration initialized")]
+        private static partial void LogInitialized(ILogger logger);
     }
 }

@@ -51,5 +51,6 @@
     <PackageReference Include="Autoupdater.NET.Official" Version="1.9.2" />
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />
     <PackageReference Include="Vanara.PInvoke.Security" Version="5.0.5" />
+    <PackageReference Include="Vanara.PInvoke.Shell32" Version="5.0.5" />
   </ItemGroup>
 </Project>
