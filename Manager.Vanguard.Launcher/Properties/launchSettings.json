@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "launcher (GUI)": {
+      "commandName": "Project"
+    },
+    "launcher (startup)": {
+      "commandName": "Project",
+      "commandLineArgs": "startup"
+    },
+    "launcher (request)": {
+      "commandName": "Project",
+      "commandLineArgs": "request\r\nC:\\WINDOWS\\system32\\cmd.exe"
+    }
+  }
+}

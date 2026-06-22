@@ -15,16 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Vanguard Manager. If not, see <http://www.gnu.org/licenses/>.
 
-using Microsoft.Extensions.Localization;
-
-namespace Manager.Vanguard.Translations.Resources
+namespace Manager.Vanguard.Launcher.GUI
 {
-    public sealed class LauncherLocalizer(IStringLocalizer<LauncherLocalizer> Localizer)
+    public partial class MainWindow : Form
     {
-        private readonly IStringLocalizer localizer = Localizer;
-
-        public string RebootPrompt => this.localizer.GetString("RebootPrompt");
-
-        public string RebootPromptTitle => this.localizer.GetString("RebootPromptTitle");
+        public MainWindow()
+        {
+            this.InitializeComponent();
+        }
     }
 }

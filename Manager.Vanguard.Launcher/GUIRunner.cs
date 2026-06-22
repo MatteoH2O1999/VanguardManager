@@ -15,37 +15,34 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Vanguard Manager. If not, see <http://www.gnu.org/licenses/>.
 
-using Manager.Vanguard.Common;
-using Manager.Vanguard.Updater;
+using Manager.Vanguard.Launcher.GUI;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-
-builder.Logging.ClearProviders();
-builder.Logging.AddFileLogging("updater");
-builder.Logging.AddEventLog(options =>
+namespace Manager.Vanguard.Launcher
 {
-    options.Filter = (_, level) => level >= LogLevel.Critical;
-    options.SourceName = ApplicationData.AppName;
-});
-#if DEBUG
-builder.Logging.AddConsole();
-builder.Logging.SetMinimumLevel(LogLevel.Trace);
-#endif
+    internal sealed partial class GUIRunner(ILogger<GUIRunner> Logger, MainWindow MainWindow)
+    {
+        private readonly ILogger logger = Logger;
+        private readonly MainWindow mainWindow = MainWindow;
 
-builder.Services.AddTransient<Runner>();
+        public void Run()
+        {
+            this.LogOpeningMainWindow();
+            Application.Run(this.mainWindow);
+        }
 
-using IHost app = builder.Build();
+        [LoggerMessage(LogLevel.Information, "Opening main window")]
+        private partial void LogOpeningMainWindow();
+    }
 
-try
-{
-    Runner runner = app.Services.GetRequiredService<Runner>();
-    runner.Run();
-}
-catch (Exception ex)
-{
-    ILogger logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger(string.Empty);
-    Logs.LogOutOfHostCrash(logger, ex);
+    internal static class GUIRegistration
+    {
+        public static T AddGUI<T>(this T services)
+            where T : IServiceCollection
+        {
+            services.AddTransient<MainWindow>();
+            return services;
+        }
+    }
 }

@@ -1,4 +1,4 @@
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
   <Fragment>
     <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
       <Files Include="!(bindpath.Manager.Vanguard.Updater)\**">
@@ -18,7 +18,9 @@
           Start="auto"
           Account="NT SERVICE\$(ServiceName)"
           ErrorControl="normal"
-        />
+        >
+          <util:PermissionEx User="Users" ServiceStart="true" />
+        </ServiceInstall>
         <ServiceControl Id="StartService" Stop="both" Remove="uninstall" Name="$(ServiceName)" Wait="yes" />
       </Component>
     </ComponentGroup>
