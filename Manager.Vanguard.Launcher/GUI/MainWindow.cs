@@ -21,7 +21,7 @@ namespace Manager.Vanguard.Launcher.GUI
     {
         public MainWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }
