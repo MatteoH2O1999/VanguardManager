@@ -39,13 +39,41 @@ builder.Services.AddTransient<Runner>();
 
 using IHost app = builder.Build();
 
+ILogger logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("UpdaterHost");
+
+Logs.LogOutOfHostMessage(logger, LogLevel.Debug, "Acquiring updater lock");
+IDisposable? updaterLock;
 try
 {
-    Runner runner = app.Services.GetRequiredService<Runner>();
-    runner.Run();
+    updaterLock = Locks.UPDATER.TryAcquire();
 }
-catch (Exception ex)
+catch (LockException ex)
 {
-    ILogger logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger(string.Empty);
-    Logs.LogOutOfHostCrash(logger, ex);
+    Logs.LogOutOfHostMessage(logger, LogLevel.Error, "Could not acquire updater lock", ex);
+    Environment.ExitCode = -1;
+    return;
+}
+
+if (updaterLock is null)
+{
+    Logs.LogOutOfHostMessage(logger, LogLevel.Error, "Updater lock already in use by another process");
+    Environment.ExitCode = -1;
+    return;
+}
+else
+{
+    Logs.LogOutOfHostMessage(logger, LogLevel.Information, "Updater lock acquired");
+}
+
+using (updaterLock)
+{
+    try
+    {
+        Runner runner = app.Services.GetRequiredService<Runner>();
+        runner.Run();
+    }
+    catch (Exception ex)
+    {
+        Logs.LogOutOfHostCrash(logger, ex);
+    }
 }

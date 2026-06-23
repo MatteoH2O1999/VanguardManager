@@ -38,40 +38,15 @@ namespace Manager.Vanguard.Service
         {
             try
             {
-                this.LogAcquiringServiceLock();
-                IDisposable? serviceLock;
-                try
+                if (this.requestManager.RequestExists())
                 {
-                    serviceLock = Locks.SERVICE.TryAcquire();
-                }
-                catch (LockException ex)
-                {
-                    this.LogServiceLockError(ex);
-                    Environment.ExitCode = -1;
-                    this.hostApplicationLifetime.StopApplication();
-                    return;
-                }
-
-                if (serviceLock is null)
-                {
-                    this.LogServiceLockAlreadyInUse();
-                    Environment.ExitCode = -1;
+                    await this.HandleRequest(stoppingToken);
                 }
                 else
                 {
-                    this.LogServiceLockAcquired();
-                    using (serviceLock)
-                    {
-                        if (this.requestManager.RequestExists())
-                        {
-                            await this.HandleRequest(stoppingToken);
-                        }
-                        else
-                        {
-                            await this.HandleNoRequest(stoppingToken);
-                        }
-                    }
+                    await this.HandleNoRequest(stoppingToken);
                 }
+
                 this.LogStoppingService();
             }
             catch (OperationCanceledException)
@@ -250,22 +225,10 @@ namespace Manager.Vanguard.Service
 
         #region ExecuteAsync Logging
 
-        [LoggerMessage(65000, LogLevel.Debug, "Acquiring service lock")]
-        private partial void LogAcquiringServiceLock();
-
-        [LoggerMessage(65001, LogLevel.Error, "Could not acquire service lock")]
-        private partial void LogServiceLockError(LockException ex);
-
-        [LoggerMessage(65002, LogLevel.Error, "Service lock already in use by another process")]
-        private partial void LogServiceLockAlreadyInUse();
-
-        [LoggerMessage(65003, LogLevel.Information, "Service lock acquired")]
-        private partial void LogServiceLockAcquired();
-
-        [LoggerMessage(65004, LogLevel.Information, "Stopping service")]
+        [LoggerMessage(65000, LogLevel.Information, "Stopping service")]
         private partial void LogStoppingService();
 
-        [LoggerMessage(65005, LogLevel.Warning, "The operation was cancelled")]
+        [LoggerMessage(65001, LogLevel.Warning, "The operation was cancelled")]
         private partial void LogCancelled();
 
         #endregion

@@ -53,22 +53,47 @@ namespace Manager.Vanguard.Launcher
             builder.Services.AddTransient<Runner>();
 
             using IHost app = builder.Build();
-            ILogger<IHost> appLogger = app.Services.GetRequiredService<ILogger<IHost>>();
-            ApplicationConfiguration.Initialize();
-            LogInitialized(appLogger);
+            ILogger logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("LauncherHost");
 
+            Logs.LogOutOfHostMessage(logger, LogLevel.Debug, "Acquiring launcher lock");
+            IDisposable? launcherLock;
             try
             {
-                Runner runner = app.Services.GetRequiredService<Runner>();
-                runner.Run(args);
+                launcherLock = Locks.LAUNCHER.TryAcquire();
             }
-            catch (Exception ex)
+            catch (LockException ex)
             {
-                Logs.LogOutOfHostCrash(appLogger, ex);
+                Logs.LogOutOfHostMessage(logger, LogLevel.Error, "Could not acquire launcher lock", ex);
+                Environment.ExitCode = -1;
+                return;
+            }
+
+            if (launcherLock is null)
+            {
+                Logs.LogOutOfHostMessage(logger, LogLevel.Error, "Launcher lock already in use by another process");
+                Environment.ExitCode = -1;
+                return;
+            }
+            else
+            {
+                Logs.LogOutOfHostMessage(logger, LogLevel.Information, "Launcher lock acquired");
+            }
+
+            using (launcherLock)
+            {
+                ApplicationConfiguration.Initialize();
+                Logs.LogOutOfHostMessage(logger, LogLevel.Information, "GUI configuration initialized");
+
+                try
+                {
+                    Runner runner = app.Services.GetRequiredService<Runner>();
+                    runner.Run(args);
+                }
+                catch (Exception ex)
+                {
+                    Logs.LogOutOfHostCrash(logger, ex);
+                }
             }
         }
-
-        [LoggerMessage(LogLevel.Information, "GUI configuration initialized")]
-        private static partial void LogInitialized(ILogger logger);
     }
 }
