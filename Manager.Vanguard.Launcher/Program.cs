@@ -109,6 +109,7 @@ namespace Manager.Vanguard.Launcher
                 }
                 catch (Exception ex)
                 {
+                    Logs.LogOutOfHostCrash(logger, ex);
                     MessageBox.Show(
                         localization.Launcher.StartupErrorMessage(ex),
                         localization.Launcher.StartupErrorTitle,
@@ -117,7 +118,6 @@ namespace Manager.Vanguard.Launcher
                         MessageBoxDefaultButton.Button1,
                         MessageBoxOptions.DefaultDesktopOnly
                     );
-                    Logs.LogOutOfHostCrash(logger, ex);
                 }
             }
         }
