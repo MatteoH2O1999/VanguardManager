@@ -22,5 +22,13 @@ namespace Manager.Vanguard.Translations.Resources
     public sealed class UpdaterLocalizer(IStringLocalizer<UpdaterLocalizer> Localizer)
     {
         private readonly IStringLocalizer localizer = Localizer;
+
+        public string AlreadyInUseMessage => this.localizer.GetString("AlreadyInUseMessage");
+
+        public string AlreadyInUseTitle => this.localizer.GetString("AlreadyInUseTitle");
+
+        public string StartupErrorMessage(Exception ex) => this.localizer.GetString("StartupErrorMessage", ex.Message);
+
+        public string StartupErrorTitle => this.localizer.GetString("StartupErrorTitle");
     }
 }

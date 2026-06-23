@@ -117,4 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AlreadyInUseMessage" xml:space="preserve">
+    <value>Updater already in use</value>
+  </data>
+  <data name="AlreadyInUseTitle" xml:space="preserve">
+    <value>Already in use</value>
+  </data>
+  <data name="StartupErrorMessage" xml:space="preserve">
+    <value>Error in startup: {0}</value>
+  </data>
+  <data name="StartupErrorTitle" xml:space="preserve">
+    <value>Error in startup</value>
+  </data>
 </root>

@@ -43,5 +43,35 @@ builder.Services.AddTransient<VanguardManager>();
 builder.Services.AddTransient<GameManager>();
 builder.Services.AddHostedService<Worker>();
 
-IHost host = builder.Build();
-host.Run();
+using IHost host = builder.Build();
+
+ILogger logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("ServiceHost");
+
+Logs.LogOutOfHostMessage(logger, LogLevel.Debug, "Acquiring service lock");
+IDisposable? serviceLock;
+try
+{
+    serviceLock = Locks.SERVICE.TryAcquire();
+}
+catch (LockException ex)
+{
+    Logs.LogOutOfHostMessage(logger, LogLevel.Error, "Could not acquire service lock", ex);
+    Environment.ExitCode = -1;
+    return;
+}
+
+if (serviceLock is null)
+{
+    Logs.LogOutOfHostMessage(logger, LogLevel.Error, "Service lock already in use by another process");
+    Environment.ExitCode = -1;
+    return;
+}
+else
+{
+    Logs.LogOutOfHostMessage(logger, LogLevel.Information, "Service lock acquired");
+}
+
+using (serviceLock)
+{
+    host.Run();
+}

@@ -117,4 +117,18 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AlreadyInUseMessage" xml:space="preserve">
+    <value>Il software di aggiornamento è già in esecuzione.</value>
+  </data>
+  <data name="AlreadyInUseTitle" xml:space="preserve">
+    <value>Già in esecuzione</value>
+  </data>
+  <data name="StartupErrorMessage" xml:space="preserve">
+    <value>È stato riscontrato un errore imprevisto durante l'avvio del software di aggiornamento.
+
+Dettagli: {0}</value>
+  </data>
+  <data name="StartupErrorTitle" xml:space="preserve">
+    <value>Errore di avvio</value>
+  </data>
 </root>

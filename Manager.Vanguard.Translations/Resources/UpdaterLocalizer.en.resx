@@ -117,4 +117,18 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AlreadyInUseMessage" xml:space="preserve">
+    <value>The updater is already running.</value>
+  </data>
+  <data name="AlreadyInUseTitle" xml:space="preserve">
+    <value>Already in use</value>
+  </data>
+  <data name="StartupErrorMessage" xml:space="preserve">
+    <value>An error occurred during updater startup.
+
+Details: {0}</value>
+  </data>
+  <data name="StartupErrorTitle" xml:space="preserve">
+    <value>Startup error</value>
+  </data>
 </root>
