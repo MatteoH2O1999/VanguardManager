@@ -32,7 +32,7 @@ namespace Manager.Vanguard.Launcher
     )
     {
         private const int SERVICE_SHUTDOWN_INTERVAL_MILLISECONDS = 1000;
-        private const uint SHUTDOWN_GRACE_PERIOD_SECONDS = 20;
+        private const uint SHUTDOWN_GRACE_PERIOD_SECONDS = 5;
 
         private readonly ILogger logger = Logger;
         private readonly RequestManager requestManager = RManager;
@@ -151,7 +151,49 @@ namespace Manager.Vanguard.Launcher
 
         private void GetShutdownPrivilege()
         {
-            throw new NotImplementedException();
+            this.logger.LogDebug("Opening process token");
+            if (
+                !OpenProcessToken(
+                    Kernel32.GetCurrentProcess(),
+                    TokenAccess.TOKEN_ADJUST_PRIVILEGES | TokenAccess.TOKEN_QUERY,
+                    out var token
+                )
+            )
+            {
+                Exception ex =
+                    Win32Error.GetExceptionForLastError()
+                    ?? throw new RebootException("Could not open process token. Last error must be a failure");
+                this.logger.LogError(ex, "Error while opening process token");
+                throw new RebootException("Could not open process token", ex);
+            }
+
+            using (token)
+            {
+                this.logger.LogDebug("Looking up privilege value");
+                if (!LookupPrivilegeValue(null, "SeShutdownPrivilege", out LUID luid))
+                {
+                    Exception ex =
+                        Win32Error.GetExceptionForLastError()
+                        ?? throw new RebootException("Could not lookup privilege value. Last error must be a failure");
+                    this.logger.LogError(ex, "Error while looking up privilege value");
+                    throw new RebootException("Could not lookup privilege value", ex);
+                }
+                this.logger.LogDebug("LUID of required privilege: {}", luid);
+
+                TOKEN_PRIVILEGES privileges = new(luid, PrivilegeAttributes.SE_PRIVILEGE_ENABLED);
+
+                this.logger.LogDebug("Adjusting token privileges");
+                Win32Error result = AdjustTokenPrivileges(token, false, privileges, out _);
+                if (!result.Succeeded)
+                {
+                    Exception ex =
+                        result.GetException()
+                        ?? throw new RebootException("Result is not a success. Exception must be not null");
+                    this.logger.LogError(ex, "Error while adjusting token privileges");
+                    throw new RebootException("Could not adjust token privileges", ex);
+                }
+                this.logger.LogDebug("Token privileges sucessfully adjusted");
+            }
         }
 
         [LoggerMessage(LogLevel.Debug, "Running request handler for args {args}")]
@@ -198,5 +240,14 @@ namespace Manager.Vanguard.Launcher
 
         [LoggerMessage(LogLevel.Information, "Starting process")]
         private partial void LogStartingProcess();
+    }
+
+    public sealed class RebootException : Exception
+    {
+        public RebootException(string message)
+            : base(message) { }
+
+        public RebootException(string message, Exception inner)
+            : base(message, inner) { }
     }
 }
