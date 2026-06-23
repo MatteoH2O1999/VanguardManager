@@ -102,8 +102,14 @@ namespace Manager.Vanguard.Launcher
             }
             this.LogStoppedManagerService();
 
+            bool autorestart = ApplicationData.AutoRestart;
+            if (autorestart)
+            {
+                this.LogAutoRestart();
+            }
+
             if (
-                ApplicationData.AutoRestart
+                autorestart
                 || MessageBox.Show(
                     this.localization.Launcher.RebootPrompt,
                     this.localization.Launcher.RebootPromptTitle,
@@ -153,6 +159,9 @@ namespace Manager.Vanguard.Launcher
 
         [LoggerMessage(LogLevel.Information, "Manager service stopped")]
         private partial void LogStoppedManagerService();
+
+        [LoggerMessage(LogLevel.Information, "Autorestart is enabled")]
+        private partial void LogAutoRestart();
 
         [LoggerMessage(LogLevel.Information, "Rebooting system")]
         private partial void LogRebootingSystem();
