@@ -16,6 +16,7 @@
 // along with Vanguard Manager. If not, see <http://www.gnu.org/licenses/>.
 
 using Manager.Vanguard.Common;
+using Manager.Vanguard.Translations;
 using Manager.Vanguard.Updater;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,11 +36,14 @@ builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Trace);
 #endif
 
+builder.Services.AddLocalizations();
+
 builder.Services.AddTransient<Runner>();
 
 using IHost app = builder.Build();
 
 ILogger logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("UpdaterHost");
+Localization localization = app.Services.GetRequiredService<Localization>();
 
 Logs.LogOutOfHostMessage(logger, LogLevel.Debug, "Acquiring updater lock");
 IDisposable? updaterLock;
@@ -51,6 +55,14 @@ catch (LockException ex)
 {
     Logs.LogOutOfHostMessage(logger, LogLevel.Error, "Could not acquire updater lock", ex);
     Environment.ExitCode = -1;
+    MessageBox.Show(
+        localization.Updater.StartupErrorMessage(ex),
+        localization.Updater.StartupErrorTitle,
+        MessageBoxButtons.OK,
+        MessageBoxIcon.Error,
+        MessageBoxDefaultButton.Button1,
+        MessageBoxOptions.DefaultDesktopOnly
+    );
     return;
 }
 
@@ -58,6 +70,14 @@ if (updaterLock is null)
 {
     Logs.LogOutOfHostMessage(logger, LogLevel.Error, "Updater lock already in use by another process");
     Environment.ExitCode = -1;
+    MessageBox.Show(
+        localization.Updater.AlreadyInUseMessage,
+        localization.Updater.AlreadyInUseTitle,
+        MessageBoxButtons.OK,
+        MessageBoxIcon.Warning,
+        MessageBoxDefaultButton.Button1,
+        MessageBoxOptions.DefaultDesktopOnly
+    );
     return;
 }
 else
@@ -75,5 +95,13 @@ using (updaterLock)
     catch (Exception ex)
     {
         Logs.LogOutOfHostCrash(logger, ex);
+        MessageBox.Show(
+            localization.Updater.StartupErrorMessage(ex),
+            localization.Updater.StartupErrorTitle,
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error,
+            MessageBoxDefaultButton.Button1,
+            MessageBoxOptions.DefaultDesktopOnly
+        );
     }
 }
