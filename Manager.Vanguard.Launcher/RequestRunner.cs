@@ -19,6 +19,7 @@ using System.Diagnostics;
 using Manager.Vanguard.Common;
 using Manager.Vanguard.Translations;
 using Microsoft.Extensions.Logging;
+using Vanara.PInvoke;
 using static Vanara.PInvoke.AdvApi32;
 
 namespace Manager.Vanguard.Launcher
@@ -31,6 +32,7 @@ namespace Manager.Vanguard.Launcher
     )
     {
         private const int SERVICE_SHUTDOWN_INTERVAL_MILLISECONDS = 1000;
+        private const uint SHUTDOWN_GRACE_PERIOD_SECONDS = 20;
 
         private readonly ILogger logger = Logger;
         private readonly RequestManager requestManager = RManager;
@@ -39,6 +41,7 @@ namespace Manager.Vanguard.Launcher
 
         public void Run(string[] args)
         {
+            this.Reboot();
             this.LogRunnerArgs(args);
 
             if (args.Length < 1)
@@ -130,6 +133,24 @@ namespace Manager.Vanguard.Launcher
 
         private void Reboot()
         {
+            this.GetShutdownPrivilege();
+            Win32Error result = InitiateShutdown(
+                null,
+                this.localization.Launcher.RebootMessage,
+                SHUTDOWN_GRACE_PERIOD_SECONDS,
+                ShutdownFlags.SHUTDOWN_FORCE_SELF
+                    | ShutdownFlags.SHUTDOWN_RESTART
+                    | ShutdownFlags.SHUTDOWN_FORCE_OTHERS,
+                SystemShutDownReason.SHTDN_REASON_FLAG_PLANNED
+                    | SystemShutDownReason.SHTDN_REASON_MAJOR_NONE
+                    | SystemShutDownReason.SHTDN_REASON_MINOR_RECONFIG
+            );
+            this.LogRebootResult(result);
+            result.ThrowIfFailed("Failed to reboot");
+        }
+
+        private void GetShutdownPrivilege()
+        {
             throw new NotImplementedException();
         }
 
@@ -165,6 +186,9 @@ namespace Manager.Vanguard.Launcher
 
         [LoggerMessage(LogLevel.Information, "Rebooting system")]
         private partial void LogRebootingSystem();
+
+        [LoggerMessage(LogLevel.Debug, "Reboot result: {result}")]
+        private partial void LogRebootResult(Win32Error result);
 
         [LoggerMessage(LogLevel.Information, "Waiting for reboot")]
         private partial void LogWaitForReboot();

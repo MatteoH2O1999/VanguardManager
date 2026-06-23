@@ -137,4 +137,7 @@ Details: {0}</value>
   <data name="StartupErrorTitle" xml:space="preserve">
     <value>Startup error</value>
   </data>
+  <data name="RebootMessage" xml:space="preserve">
+    <value>The system needs to reboot in order to activate Vanguard</value>
+  </data>
 </root>

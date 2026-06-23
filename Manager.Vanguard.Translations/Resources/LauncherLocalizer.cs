@@ -34,5 +34,7 @@ namespace Manager.Vanguard.Translations.Resources
         public string StartupErrorMessage(Exception ex) => this.localizer.GetString("StartupErrorMessage", ex.Message);
 
         public string StartupErrorTitle => this.localizer.GetString("StartupErrorTitle");
+
+        public string RebootMessage => this.localizer.GetString("RebootMessage");
     }
 }

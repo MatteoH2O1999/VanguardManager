@@ -137,4 +137,7 @@ Dettagli: {0}</value>
   <data name="StartupErrorTitle" xml:space="preserve">
     <value>Errore di avvio</value>
   </data>
+  <data name="RebootMessage" xml:space="preserve">
+    <value>Il sistema deve essere riavviato per attivare Vanguard</value>
+  </data>
 </root>
