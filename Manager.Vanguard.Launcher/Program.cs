@@ -53,7 +53,9 @@ namespace Manager.Vanguard.Launcher
             builder.Services.AddTransient<Runner>();
 
             using IHost app = builder.Build();
+
             ILogger logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("LauncherHost");
+            Localization localization = app.Services.GetRequiredService<Localization>();
 
             Logs.LogOutOfHostMessage(logger, LogLevel.Debug, "Acquiring launcher lock");
             IDisposable? launcherLock;
@@ -65,6 +67,14 @@ namespace Manager.Vanguard.Launcher
             {
                 Logs.LogOutOfHostMessage(logger, LogLevel.Error, "Could not acquire launcher lock", ex);
                 Environment.ExitCode = -1;
+                MessageBox.Show(
+                    localization.Launcher.StartupErrorMessage(ex),
+                    localization.Launcher.StartupErrorTitle,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1,
+                    MessageBoxOptions.DefaultDesktopOnly
+                );
                 return;
             }
 
@@ -72,6 +82,14 @@ namespace Manager.Vanguard.Launcher
             {
                 Logs.LogOutOfHostMessage(logger, LogLevel.Error, "Launcher lock already in use by another process");
                 Environment.ExitCode = -1;
+                MessageBox.Show(
+                    localization.Launcher.AlreadyInUseMessage,
+                    localization.Launcher.AlreadyInUseTitle,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button1,
+                    MessageBoxOptions.DefaultDesktopOnly
+                );
                 return;
             }
             else
@@ -91,6 +109,14 @@ namespace Manager.Vanguard.Launcher
                 }
                 catch (Exception ex)
                 {
+                    MessageBox.Show(
+                        localization.Launcher.StartupErrorMessage(ex),
+                        localization.Launcher.StartupErrorTitle,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1,
+                        MessageBoxOptions.DefaultDesktopOnly
+                    );
                     Logs.LogOutOfHostCrash(logger, ex);
                 }
             }

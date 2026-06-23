@@ -117,10 +117,24 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AlreadyInUseMessage" xml:space="preserve">
+    <value>Il software è già in esecuzione.</value>
+  </data>
+  <data name="AlreadyInUseTitle" xml:space="preserve">
+    <value>Già in esecuzione</value>
+  </data>
   <data name="RebootPrompt" xml:space="preserve">
     <value>Per attivare Vanguard è necessario riavviare il sistema: vuoi farlo ora?</value>
   </data>
   <data name="RebootPromptTitle" xml:space="preserve">
     <value>Riavvia il sistema</value>
+  </data>
+  <data name="StartupErrorMessage" xml:space="preserve">
+    <value>È stato riscontrato un errore imprevisto durante l'avvio del software.
+
+Dettagli: {0}</value>
+  </data>
+  <data name="StartupErrorTitle" xml:space="preserve">
+    <value>Errore di avvio</value>
   </data>
 </root>

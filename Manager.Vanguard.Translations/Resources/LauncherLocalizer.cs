@@ -26,5 +26,13 @@ namespace Manager.Vanguard.Translations.Resources
         public string RebootPrompt => this.localizer.GetString("RebootPrompt");
 
         public string RebootPromptTitle => this.localizer.GetString("RebootPromptTitle");
+
+        public string AlreadyInUseMessage => this.localizer.GetString("AlreadyInUseMessage");
+
+        public string AlreadyInUseTitle => this.localizer.GetString("AlreadyInUseTitle");
+
+        public string StartupErrorMessage(Exception ex) => this.localizer.GetString("StartupErrorMessage", ex.Message);
+
+        public string StartupErrorTitle => this.localizer.GetString("StartupErrorTitle");
     }
 }
