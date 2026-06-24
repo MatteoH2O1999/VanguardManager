@@ -61,9 +61,6 @@ namespace Manager.Vanguard.Launcher
 
             if (this.serviceManager.CheckStatus(ApplicationData.KernelLevelServiceName) == ServiceState.SERVICE_RUNNING)
             {
-                Trace.Assert(
-                    this.serviceManager.CheckStatus(ApplicationData.ServiceName) == ServiceState.SERVICE_RUNNING
-                );
                 this.Start(executable, executableArgs);
             }
             else
@@ -123,7 +120,21 @@ namespace Manager.Vanguard.Launcher
             )
             {
                 this.LogRebootingSystem();
-                this.Reboot();
+                try
+                {
+                    this.Reboot();
+                }
+                catch (RebootException ex)
+                {
+                    MessageBox.Show(
+                        this.localization.Launcher.RebootErrorMessage(ex),
+                        this.localization.Launcher.RebootErrorTitle,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1,
+                        MessageBoxOptions.DefaultDesktopOnly
+                    );
+                }
                 return;
             }
             this.LogWaitForReboot();
@@ -142,7 +153,14 @@ namespace Manager.Vanguard.Launcher
                     | SystemShutDownReason.SHTDN_REASON_MINOR_RECONFIG
             );
             this.LogRebootResult(result);
-            result.ThrowIfFailed("Failed to reboot");
+            if (!result.Succeeded)
+            {
+                throw new RebootException(
+                    "Failed to reboot",
+                    result.GetException()
+                        ?? throw new RebootException("InitiateShutdown failed. Result must be a failure")
+                );
+            }
         }
 
         private void GetShutdownPrivilege()

@@ -137,4 +137,12 @@ Dettagli: {0}</value>
   <data name="StartupErrorTitle" xml:space="preserve">
     <value>Errore di avvio</value>
   </data>
+  <data name="RebootErrorMessage" xml:space="preserve">
+    <value>Si è verificato un errore imprevisto durante la richiesta di un riavvio del sistema. Riavviare il sistema manualmente per iniziare a giocare.
+
+Dettagli: {0}</value>
+  </data>
+  <data name="RebootErrorTitle" xml:space="preserve">
+    <value>Impossibile riavviare il sistema</value>
+  </data>
 </root>

@@ -135,4 +135,10 @@
   <data name="StartupErrorTitle" xml:space="preserve">
     <value>Error in startup</value>
   </data>
+  <data name="RebootErrorMessage" xml:space="preserve">
+    <value>Error while rebooting: {0}</value>
+  </data>
+  <data name="RebootErrorTitle" xml:space="preserve">
+    <value>Reboot failed</value>
+  </data>
 </root>
