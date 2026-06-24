@@ -21,6 +21,7 @@ using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using Microsoft.Extensions.Logging;
+using Vanara.InteropServices;
 using Vanara.PInvoke;
 using static Vanara.PInvoke.AdvApi32;
 
@@ -382,6 +383,39 @@ namespace Manager.Vanguard.Common
 
             this.LogCheckStatus(serviceName, status.dwCurrentState);
             return status.dwCurrentState;
+        }
+
+        public ServiceStartType CheckStartupMode(string serviceName)
+        {
+            using var service = OpenService(this.scm, serviceName, ServiceAccessTypes.SERVICE_QUERY_CONFIG);
+            if (service.IsInvalid)
+            {
+                Exception ex =
+                    Win32Error.GetExceptionForLastError()
+                    ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
+                throw new ServiceManagerException($"Invalid handle to service {serviceName}", ex);
+            }
+
+            if (
+                QueryServiceConfig(service, nint.Zero, 0, out uint bytesNeeded)
+                || Win32Error.GetLastError() != Win32Error.ERROR_INSUFFICIENT_BUFFER
+            )
+            {
+                throw new ServiceManagerException("Could not get needed bytes to query service config");
+            }
+
+            using SafeCoTaskMemHandle buffer = new(bytesNeeded);
+            if (!QueryServiceConfig(service, buffer, bytesNeeded, out _))
+            {
+                Exception ex =
+                    Win32Error.GetExceptionForLastError()
+                    ?? throw new ServiceManagerException("QueryServiceConfig failed. Last error must be a failure");
+                throw new ServiceManagerException("Could not query service config", ex);
+            }
+
+            QUERY_SERVICE_CONFIG config = buffer.ToStructure<QUERY_SERVICE_CONFIG>();
+
+            return config.dwStartType;
         }
 
         public void Dispose()
