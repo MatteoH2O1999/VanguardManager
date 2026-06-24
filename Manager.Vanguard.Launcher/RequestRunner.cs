@@ -32,6 +32,7 @@ namespace Manager.Vanguard.Launcher
     )
     {
         private const int SERVICE_SHUTDOWN_INTERVAL_MILLISECONDS = 1000;
+        private const string SHUTDOWN_PRIVILEGE_NAME = "SeShutdownPrivilege";
 
         private readonly ILogger logger = Logger;
         private readonly RequestManager requestManager = RManager;
@@ -187,7 +188,7 @@ namespace Manager.Vanguard.Launcher
 
         private void GetShutdownPrivilege()
         {
-            this.logger.LogDebug("Opening process token");
+            this.LogOpenProcessToken();
             if (
                 !OpenProcessToken(
                     Kernel32.GetCurrentProcess(),
@@ -199,36 +200,36 @@ namespace Manager.Vanguard.Launcher
                 Exception ex =
                     Win32Error.GetExceptionForLastError()
                     ?? throw new RebootException("Could not open process token. Last error must be a failure");
-                this.logger.LogError(ex, "Error while opening process token");
+                this.LogOpenProcessTokenError(ex);
                 throw new RebootException("Could not open process token", ex);
             }
 
             using (token)
             {
-                this.logger.LogDebug("Looking up privilege value");
-                if (!LookupPrivilegeValue(null, "SeShutdownPrivilege", out LUID luid))
+                this.LogLookingUpPrivilegeValue(SHUTDOWN_PRIVILEGE_NAME);
+                if (!LookupPrivilegeValue(null, SHUTDOWN_PRIVILEGE_NAME, out LUID luid))
                 {
                     Exception ex =
                         Win32Error.GetExceptionForLastError()
                         ?? throw new RebootException("Could not lookup privilege value. Last error must be a failure");
-                    this.logger.LogError(ex, "Error while looking up privilege value");
+                    this.LogLookingUpPrivilegeValueError(SHUTDOWN_PRIVILEGE_NAME, ex);
                     throw new RebootException("Could not lookup privilege value", ex);
                 }
-                this.logger.LogDebug("LUID of required privilege: {}", luid);
+                this.LogPrivilegeValue(SHUTDOWN_PRIVILEGE_NAME, luid);
 
                 TOKEN_PRIVILEGES privileges = new(luid, PrivilegeAttributes.SE_PRIVILEGE_ENABLED);
 
-                this.logger.LogDebug("Adjusting token privileges");
+                this.LogAdjustingTokenPrivileges();
                 Win32Error result = AdjustTokenPrivileges(token, false, privileges, out _);
                 if (!result.Succeeded)
                 {
                     Exception ex =
                         result.GetException()
                         ?? throw new RebootException("Result is not a success. Exception must be not null");
-                    this.logger.LogError(ex, "Error while adjusting token privileges");
+                    this.LogAdjustingTokenPrivilegesError(ex);
                     throw new RebootException("Could not adjust token privileges", ex);
                 }
-                this.logger.LogDebug("Token privileges sucessfully adjusted");
+                this.LogAdjustedTokenPrivileges();
             }
         }
 
@@ -276,6 +277,30 @@ namespace Manager.Vanguard.Launcher
 
         [LoggerMessage(LogLevel.Information, "Starting process")]
         private partial void LogStartingProcess();
+
+        [LoggerMessage(LogLevel.Debug, "Opening process token")]
+        private partial void LogOpenProcessToken();
+
+        [LoggerMessage(LogLevel.Error, "Error while opening process token")]
+        private partial void LogOpenProcessTokenError(Exception ex);
+
+        [LoggerMessage(LogLevel.Debug, "Looking up value for privilege {privilege}")]
+        private partial void LogLookingUpPrivilegeValue(string privilege);
+
+        [LoggerMessage(LogLevel.Error, "Error while looking up value for privilege {privilege}")]
+        private partial void LogLookingUpPrivilegeValueError(string privilege, Exception ex);
+
+        [LoggerMessage(LogLevel.Debug, "LUID of privilege {privilege}: {value}")]
+        private partial void LogPrivilegeValue(string privilege, LUID value);
+
+        [LoggerMessage(LogLevel.Debug, "Adjusting token privileges")]
+        private partial void LogAdjustingTokenPrivileges();
+
+        [LoggerMessage(LogLevel.Error, "Error while adjusting token privileges")]
+        private partial void LogAdjustingTokenPrivilegesError(Exception ex);
+
+        [LoggerMessage(LogLevel.Debug, "Token privileges sucessfully adjusted")]
+        private partial void LogAdjustedTokenPrivileges();
     }
 
     public sealed class RebootException : Exception
