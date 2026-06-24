@@ -32,7 +32,6 @@ namespace Manager.Vanguard.Launcher
     )
     {
         private const int SERVICE_SHUTDOWN_INTERVAL_MILLISECONDS = 1000;
-        private const uint SHUTDOWN_GRACE_PERIOD_SECONDS = 5;
 
         private readonly ILogger logger = Logger;
         private readonly RequestManager requestManager = RManager;
@@ -41,7 +40,6 @@ namespace Manager.Vanguard.Launcher
 
         public void Run(string[] args)
         {
-            this.Reboot();
             this.LogRunnerArgs(args);
 
             if (args.Length < 1)
@@ -136,11 +134,9 @@ namespace Manager.Vanguard.Launcher
             this.GetShutdownPrivilege();
             Win32Error result = InitiateShutdown(
                 null,
-                this.localization.Launcher.RebootMessage,
-                SHUTDOWN_GRACE_PERIOD_SECONDS,
-                ShutdownFlags.SHUTDOWN_FORCE_SELF
-                    | ShutdownFlags.SHUTDOWN_RESTART
-                    | ShutdownFlags.SHUTDOWN_FORCE_OTHERS,
+                null,
+                0,
+                ShutdownFlags.SHUTDOWN_RESTART | ShutdownFlags.SHUTDOWN_FORCE_OTHERS,
                 SystemShutDownReason.SHTDN_REASON_FLAG_PLANNED
                     | SystemShutDownReason.SHTDN_REASON_MAJOR_NONE
                     | SystemShutDownReason.SHTDN_REASON_MINOR_RECONFIG
