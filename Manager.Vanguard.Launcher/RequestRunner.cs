@@ -61,7 +61,29 @@ namespace Manager.Vanguard.Launcher
 
             if (this.serviceManager.CheckStatus(ApplicationData.KernelLevelServiceName) == ServiceState.SERVICE_RUNNING)
             {
-                this.Start(executable, executableArgs);
+                ServiceStartType userServiceStartupMode = this.serviceManager.CheckStartupMode(
+                    ApplicationData.UserLevelServiceName
+                );
+
+                if (userServiceStartupMode == ServiceStartType.SERVICE_DEMAND_START)
+                {
+                    this.Start(executable, executableArgs);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        this.localization.Launcher.InvalidServiceStateMessage(
+                            ApplicationData.UserLevelServiceName,
+                            ServiceStartType.SERVICE_DEMAND_START,
+                            userServiceStartupMode
+                        ),
+                        this.localization.Launcher.InvalidServiceStateTitle,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1,
+                        MessageBoxOptions.DefaultDesktopOnly
+                    );
+                }
             }
             else
             {

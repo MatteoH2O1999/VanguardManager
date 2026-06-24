@@ -16,6 +16,7 @@
 // along with Vanguard Manager. If not, see <http://www.gnu.org/licenses/>.
 
 using Microsoft.Extensions.Localization;
+using static Vanara.PInvoke.AdvApi32;
 
 namespace Manager.Vanguard.Translations.Resources
 {
@@ -38,5 +39,10 @@ namespace Manager.Vanguard.Translations.Resources
         public string RebootErrorMessage(Exception ex) => this.localizer.GetString("RebootErrorMessage", ex.Message);
 
         public string RebootErrorTitle => this.localizer.GetString("RebootErrorTitle");
+
+        public string InvalidServiceStateMessage(string service, ServiceStartType expected, ServiceStartType actual) =>
+            this.localizer.GetString("InvalidServiceStateMessage", service, expected, actual);
+
+        public string InvalidServiceStateTitle => this.localizer.GetString("InvalidServiceStateTitle");
     }
 }

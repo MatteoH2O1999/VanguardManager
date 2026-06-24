@@ -141,4 +141,10 @@
   <data name="RebootErrorTitle" xml:space="preserve">
     <value>Reboot failed</value>
   </data>
+  <data name="InvalidServiceStateMessage" xml:space="preserve">
+    <value>Invalid user service state {0}. Expected {1}, got {2}</value>
+  </data>
+  <data name="InvalidServiceStateTitle" xml:space="preserve">
+    <value>Invalid user service state</value>
+  </data>
 </root>

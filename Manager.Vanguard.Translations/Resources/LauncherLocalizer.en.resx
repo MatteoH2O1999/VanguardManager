@@ -145,4 +145,11 @@ Details: {0}</value>
   <data name="RebootErrorTitle" xml:space="preserve">
     <value>System restart failed</value>
   </data>
+  <data name="InvalidServiceStateMessage" xml:space="preserve">
+    <value>User service {0} should be in startup mode {1}.
+Current startup mode for service {0}: {2}</value>
+  </data>
+  <data name="InvalidServiceStateTitle" xml:space="preserve">
+    <value>Invalid user service config</value>
+  </data>
 </root>
