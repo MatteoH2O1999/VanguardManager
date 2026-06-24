@@ -137,4 +137,19 @@ Dettagli: {0}</value>
   <data name="StartupErrorTitle" xml:space="preserve">
     <value>Errore di avvio</value>
   </data>
+  <data name="RebootErrorMessage" xml:space="preserve">
+    <value>Si è verificato un errore imprevisto durante la richiesta di un riavvio del sistema. Riavviare il sistema manualmente per iniziare a giocare.
+
+Dettagli: {0}</value>
+  </data>
+  <data name="RebootErrorTitle" xml:space="preserve">
+    <value>Impossibile riavviare il sistema</value>
+  </data>
+  <data name="InvalidServiceStateMessage" xml:space="preserve">
+    <value>Il servizio {0} dovrebbe avere modalità di avvio: {1}.
+Modalità di avvio corrente del servizio {0}: {2}</value>
+  </data>
+  <data name="InvalidServiceStateTitle" xml:space="preserve">
+    <value>Configurazione del servizio non valida</value>
+  </data>
 </root>

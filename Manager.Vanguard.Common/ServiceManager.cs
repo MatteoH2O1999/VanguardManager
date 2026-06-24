@@ -21,6 +21,7 @@ using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using Microsoft.Extensions.Logging;
+using Vanara.InteropServices;
 using Vanara.PInvoke;
 using static Vanara.PInvoke.AdvApi32;
 
@@ -384,6 +385,49 @@ namespace Manager.Vanguard.Common
             return status.dwCurrentState;
         }
 
+        public ServiceStartType CheckStartupMode(string serviceName)
+        {
+            this.LogCheckingStartupMode(serviceName);
+
+            using var service = OpenService(this.scm, serviceName, ServiceAccessTypes.SERVICE_QUERY_CONFIG);
+            if (service.IsInvalid)
+            {
+                Exception ex =
+                    Win32Error.GetExceptionForLastError()
+                    ?? throw new ServiceManagerException("Service handle is invalid: last error must be a failure");
+                this.LogCheckStartupModeInvalidHandle(serviceName, ex);
+                throw new ServiceManagerException($"Invalid handle to service {serviceName}", ex);
+            }
+
+            if (
+                QueryServiceConfig(service, nint.Zero, 0, out uint bytesNeeded)
+                || Win32Error.GetLastError() != Win32Error.ERROR_INSUFFICIENT_BUFFER
+            )
+            {
+                this.LogCheckStartupModeGetSizeError(serviceName);
+                throw new ServiceManagerException("Could not get needed bytes to query service config");
+            }
+
+            this.LogCheckStartupModeSize(serviceName, bytesNeeded);
+
+            using SafeCoTaskMemHandle buffer = new(bytesNeeded);
+            if (!QueryServiceConfig(service, buffer, bytesNeeded, out _))
+            {
+                Exception ex =
+                    Win32Error.GetExceptionForLastError()
+                    ?? throw new ServiceManagerException("QueryServiceConfig failed. Last error must be a failure");
+                this.LogCheckStartupModeError(serviceName, ex);
+                throw new ServiceManagerException("Could not query service config", ex);
+            }
+
+            QUERY_SERVICE_CONFIG config = buffer.ToStructure<QUERY_SERVICE_CONFIG>();
+
+            ServiceStartType startupMode = config.dwStartType;
+            this.LogStartupMode(serviceName, startupMode);
+
+            return startupMode;
+        }
+
         public void Dispose()
         {
             if (!this.disposed)
@@ -649,6 +693,36 @@ namespace Manager.Vanguard.Common
 
         [LoggerMessage(1093, LogLevel.Debug, "Current state of service {serviceName}: {currentState}")]
         private partial void LogCheckStatus(string serviceName, ServiceState currentState);
+
+        #endregion
+
+        #region CheckStartupMode Logging
+
+        [LoggerMessage(1100, LogLevel.Debug, "Checking startup mode for servce {serviceName}")]
+        private partial void LogCheckingStartupMode(string serviceName);
+
+        [LoggerMessage(
+            1101,
+            LogLevel.Error,
+            $"Error while opening handle to service {{serviceName}} with desired access {nameof(ServiceAccessTypes.SERVICE_QUERY_CONFIG)}"
+        )]
+        private partial void LogCheckStartupModeInvalidHandle(string serviceName, Exception ex);
+
+        [LoggerMessage(
+            1102,
+            LogLevel.Error,
+            "Error while getting size of configuration object for service {serviceName}"
+        )]
+        private partial void LogCheckStartupModeGetSizeError(string serviceName);
+
+        [LoggerMessage(1103, LogLevel.Debug, "Size of configuration for service {serviceName}: {size} bytes")]
+        private partial void LogCheckStartupModeSize(string serviceName, uint size);
+
+        [LoggerMessage(1104, LogLevel.Error, "Error while getting configuration of service {serviceName}")]
+        private partial void LogCheckStartupModeError(string serviceName, Exception ex);
+
+        [LoggerMessage(1105, LogLevel.Debug, "Startup mode for service {serviceName}: {startupMode}")]
+        private partial void LogStartupMode(string serviceName, ServiceStartType startupMode);
 
         #endregion
     }

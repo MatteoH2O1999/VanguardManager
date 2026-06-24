@@ -19,6 +19,7 @@ using System.Diagnostics;
 using Manager.Vanguard.Common;
 using Manager.Vanguard.Translations;
 using Microsoft.Extensions.Logging;
+using Vanara.PInvoke;
 using static Vanara.PInvoke.AdvApi32;
 
 namespace Manager.Vanguard.Launcher
@@ -31,6 +32,7 @@ namespace Manager.Vanguard.Launcher
     )
     {
         private const int SERVICE_SHUTDOWN_INTERVAL_MILLISECONDS = 1000;
+        private const string SHUTDOWN_PRIVILEGE_NAME = "SeShutdownPrivilege";
 
         private readonly ILogger logger = Logger;
         private readonly RequestManager requestManager = RManager;
@@ -60,10 +62,29 @@ namespace Manager.Vanguard.Launcher
 
             if (this.serviceManager.CheckStatus(ApplicationData.KernelLevelServiceName) == ServiceState.SERVICE_RUNNING)
             {
-                Trace.Assert(
-                    this.serviceManager.CheckStatus(ApplicationData.ServiceName) == ServiceState.SERVICE_RUNNING
+                ServiceStartType userServiceStartupMode = this.serviceManager.CheckStartupMode(
+                    ApplicationData.UserLevelServiceName
                 );
-                this.Start(executable, executableArgs);
+
+                if (userServiceStartupMode == ServiceStartType.SERVICE_DEMAND_START)
+                {
+                    this.Start(executable, executableArgs);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        this.localization.Launcher.InvalidServiceStateMessage(
+                            ApplicationData.UserLevelServiceName,
+                            ServiceStartType.SERVICE_DEMAND_START,
+                            userServiceStartupMode
+                        ),
+                        this.localization.Launcher.InvalidServiceStateTitle,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1,
+                        MessageBoxOptions.DefaultDesktopOnly
+                    );
+                }
             }
             else
             {
@@ -102,8 +123,14 @@ namespace Manager.Vanguard.Launcher
             }
             this.LogStoppedManagerService();
 
+            bool autorestart = ApplicationData.AutoRestart;
+            if (autorestart)
+            {
+                this.LogAutoRestart();
+            }
+
             if (
-                ApplicationData.AutoRestart
+                autorestart
                 || MessageBox.Show(
                     this.localization.Launcher.RebootPrompt,
                     this.localization.Launcher.RebootPromptTitle,
@@ -116,7 +143,21 @@ namespace Manager.Vanguard.Launcher
             )
             {
                 this.LogRebootingSystem();
-                this.Reboot();
+                try
+                {
+                    this.Reboot();
+                }
+                catch (RebootException ex)
+                {
+                    MessageBox.Show(
+                        this.localization.Launcher.RebootErrorMessage(ex),
+                        this.localization.Launcher.RebootErrorTitle,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1,
+                        MessageBoxOptions.DefaultDesktopOnly
+                    );
+                }
                 return;
             }
             this.LogWaitForReboot();
@@ -124,7 +165,72 @@ namespace Manager.Vanguard.Launcher
 
         private void Reboot()
         {
-            throw new NotImplementedException();
+            this.GetShutdownPrivilege();
+            Win32Error result = InitiateShutdown(
+                null,
+                null,
+                0,
+                ShutdownFlags.SHUTDOWN_RESTART | ShutdownFlags.SHUTDOWN_FORCE_OTHERS,
+                SystemShutDownReason.SHTDN_REASON_FLAG_PLANNED
+                    | SystemShutDownReason.SHTDN_REASON_MAJOR_NONE
+                    | SystemShutDownReason.SHTDN_REASON_MINOR_RECONFIG
+            );
+            this.LogRebootResult(result);
+            if (!result.Succeeded)
+            {
+                throw new RebootException(
+                    "Failed to reboot",
+                    result.GetException()
+                        ?? throw new RebootException("InitiateShutdown failed. Result must be a failure")
+                );
+            }
+        }
+
+        private void GetShutdownPrivilege()
+        {
+            this.LogOpenProcessToken();
+            if (
+                !OpenProcessToken(
+                    Kernel32.GetCurrentProcess(),
+                    TokenAccess.TOKEN_ADJUST_PRIVILEGES | TokenAccess.TOKEN_QUERY,
+                    out var token
+                )
+            )
+            {
+                Exception ex =
+                    Win32Error.GetExceptionForLastError()
+                    ?? throw new RebootException("Could not open process token. Last error must be a failure");
+                this.LogOpenProcessTokenError(ex);
+                throw new RebootException("Could not open process token", ex);
+            }
+
+            using (token)
+            {
+                this.LogLookingUpPrivilegeValue(SHUTDOWN_PRIVILEGE_NAME);
+                if (!LookupPrivilegeValue(null, SHUTDOWN_PRIVILEGE_NAME, out LUID luid))
+                {
+                    Exception ex =
+                        Win32Error.GetExceptionForLastError()
+                        ?? throw new RebootException("Could not lookup privilege value. Last error must be a failure");
+                    this.LogLookingUpPrivilegeValueError(SHUTDOWN_PRIVILEGE_NAME, ex);
+                    throw new RebootException("Could not lookup privilege value", ex);
+                }
+                this.LogPrivilegeValue(SHUTDOWN_PRIVILEGE_NAME, luid);
+
+                TOKEN_PRIVILEGES privileges = new(luid, PrivilegeAttributes.SE_PRIVILEGE_ENABLED);
+
+                this.LogAdjustingTokenPrivileges();
+                Win32Error result = AdjustTokenPrivileges(token, false, privileges, out _);
+                if (!result.Succeeded)
+                {
+                    Exception ex =
+                        result.GetException()
+                        ?? throw new RebootException("Result is not a success. Exception must be not null");
+                    this.LogAdjustingTokenPrivilegesError(ex);
+                    throw new RebootException("Could not adjust token privileges", ex);
+                }
+                this.LogAdjustedTokenPrivileges();
+            }
         }
 
         [LoggerMessage(LogLevel.Debug, "Running request handler for args {args}")]
@@ -154,8 +260,14 @@ namespace Manager.Vanguard.Launcher
         [LoggerMessage(LogLevel.Information, "Manager service stopped")]
         private partial void LogStoppedManagerService();
 
+        [LoggerMessage(LogLevel.Information, "Autorestart is enabled")]
+        private partial void LogAutoRestart();
+
         [LoggerMessage(LogLevel.Information, "Rebooting system")]
         private partial void LogRebootingSystem();
+
+        [LoggerMessage(LogLevel.Debug, "Reboot result: {result}")]
+        private partial void LogRebootResult(Win32Error result);
 
         [LoggerMessage(LogLevel.Information, "Waiting for reboot")]
         private partial void LogWaitForReboot();
@@ -165,5 +277,38 @@ namespace Manager.Vanguard.Launcher
 
         [LoggerMessage(LogLevel.Information, "Starting process")]
         private partial void LogStartingProcess();
+
+        [LoggerMessage(LogLevel.Debug, "Opening process token")]
+        private partial void LogOpenProcessToken();
+
+        [LoggerMessage(LogLevel.Error, "Error while opening process token")]
+        private partial void LogOpenProcessTokenError(Exception ex);
+
+        [LoggerMessage(LogLevel.Debug, "Looking up value for privilege {privilege}")]
+        private partial void LogLookingUpPrivilegeValue(string privilege);
+
+        [LoggerMessage(LogLevel.Error, "Error while looking up value for privilege {privilege}")]
+        private partial void LogLookingUpPrivilegeValueError(string privilege, Exception ex);
+
+        [LoggerMessage(LogLevel.Debug, "LUID of privilege {privilege}: {value}")]
+        private partial void LogPrivilegeValue(string privilege, LUID value);
+
+        [LoggerMessage(LogLevel.Debug, "Adjusting token privileges")]
+        private partial void LogAdjustingTokenPrivileges();
+
+        [LoggerMessage(LogLevel.Error, "Error while adjusting token privileges")]
+        private partial void LogAdjustingTokenPrivilegesError(Exception ex);
+
+        [LoggerMessage(LogLevel.Debug, "Token privileges sucessfully adjusted")]
+        private partial void LogAdjustedTokenPrivileges();
+    }
+
+    public sealed class RebootException : Exception
+    {
+        public RebootException(string message)
+            : base(message) { }
+
+        public RebootException(string message, Exception inner)
+            : base(message, inner) { }
     }
 }
